@@ -76,13 +76,8 @@ if (optional_param('add', false, PARAM_BOOL) && confirm_sesskey()) {
     $userstoassign = $potentialuserselector->get_selected_users();
     if (!empty($userstoassign)) {
 
-        $roleid = required_param('roleid', PARAM_INT);
-        if(empty($roleid)) {
-            print_error('no_roleid');
-        } else {
-            foreach ($userstoassign as $adduser) {
-                relationship_group_add_member($group->id, $adduser->id, $roleid);
-            }
+        foreach ($userstoassign as $adduser) {
+            relationship_group_add_member($group->id, $adduser->id, $adduser->roleid);
         }
 
         $potentialuserselector->invalidate_selected_users();
@@ -102,12 +97,6 @@ if (optional_param('remove', false, PARAM_BOOL) && confirm_sesskey()) {
     }
 }
 
-$roles = relationship_get_assignable_roles($relationship);
-$roles = array('0'=>get_string('none')) + $roles;
-if(!isset($roleid) || empty($roleid)) {
-    $roleid = $relationship->roleid2;
-}
-
 // Print the form.
 ?>
 <form id="assignform" method="post" action="<?php echo $PAGE->url ?>"><div>
@@ -122,13 +111,6 @@ if(!isset($roleid) || empty($roleid)) {
       <td id="buttonscell">
           <div id="addcontrols">
               <input name="add" id="add" type="submit" value="<?php echo $OUTPUT->larrow().'&nbsp;'.s(get_string('add')); ?>" title="<?php p(get_string('add')); ?>" /><br />
-
-              <div class="enroloptions">
-
-              <p><label for="menuroleid"><?php print_string('assignrole', 'enrol_manual') ?></label><br />
-              <?php echo html_writer::select($roles, 'roleid', $roleid, false); ?></p>
-
-              </div>
 
           </div>
 

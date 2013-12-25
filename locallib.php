@@ -374,42 +374,50 @@ class relationship_candidate_selector extends user_selector_base {
 
         // By default wherecondition retrieves all users except the deleted, not confirmed and guest.
         list($wherecondition, $params) = $this->search_sql($search, 'u');
-        $params['relationshipid'] = $this->group->relationshipid;
         $relationship = $DB->get_record('relationship', array('id' => $this->group->relationshipid), '*', MUST_EXIST);
+        $params['relationshipid'] = $relationship->id;
+        $params['relationshipgroupid'] = $this->group->id;
 
-        $fields      = 'SELECT ' . $this->required_fields_sql('u');
+        $fields      = 'SELECT ' . $this->required_fields_sql('u') . ', :roleid AS roleid';
         $countfields = 'SELECT COUNT(1)';
 
         $sql = " FROM {cohort} ch
                  JOIN {cohort_members} chm ON (chm.cohortid = ch.id)
-                 JOIN {user} u ON (u.id = chm.userid)
-            LEFT JOIN (SELECT DISTINCT rm.userid
-                         FROM {relationship} rs
-                         JOIN {relationship_groups} rg ON (rg.relationshipid = rs.id)
-                         JOIN {relationship_members} rm ON (rm.relationshipgroupid = rg.id)
-                        WHERE rs.id = :relationshipid) jrm
-                   ON (jrm.userid = u.id)
-                WHERE ch.id = :cohortid
-                  AND jrm.userid IS NULL
-                  AND $wherecondition";
+                 JOIN {user} u ON (u.id = chm.userid)";
+        $join1 = " LEFT JOIN (SELECT DISTINCT rm.userid
+                              FROM {relationship_groups} rg
+                              JOIN {relationship_members} rm ON (rm.relationshipgroupid = rg.id)
+                             WHERE rg.id = :relationshipgroupid) jrm
+                        ON (jrm.userid = u.id)";
+        $join2 = " LEFT JOIN (SELECT DISTINCT rm.userid
+                              FROM {relationship} rs
+                              JOIN {relationship_groups} rg ON (rg.relationshipid = rs.id)
+                              JOIN {relationship_members} rm ON (rm.relationshipgroupid = rg.id)
+                             WHERE rs.id = :relationshipid) jrm
+                        ON (jrm.userid = u.id)";
+        $where = " WHERE ch.id = :cohortid
+                    AND $wherecondition
+                    AND jrm.userid IS NULL";
 
         list($sort, $sortparams) = users_order_by_sql('u', $search, $this->accesscontext);
         $order = ' ORDER BY ' . $sort;
 
         if (!$this->is_validating()) {
             $params['cohortid'] = $relationship->cohortid1;
-            $potentialmemberscount = $DB->count_records_sql($countfields . $sql, $params);
+            $potentialmemberscount = $DB->count_records_sql($countfields . $sql . $join1 . $where, $params);
             $params['cohortid'] = $relationship->cohortid2;
-            $potentialmemberscount += $DB->count_records_sql($countfields . $sql, $params);
+            $potentialmemberscount += $DB->count_records_sql($countfields . $sql . $join2 . $where, $params);
             if ($potentialmemberscount > $this->maxusersperpage) {
                 return $this->too_many_results($search, $potentialmemberscount);
             }
         }
 
         $params['cohortid'] = $relationship->cohortid1;
-        $availableusers1 = $DB->get_records_sql($fields . $sql . $order, array_merge($params, $sortparams));
+        $params['roleid'] = $relationship->roleid1;
+        $availableusers1 = $DB->get_records_sql($fields . $sql . $join1 . $where . $order, array_merge($params, $sortparams));
         $params['cohortid'] = $relationship->cohortid2;
-        $availableusers2 = $DB->get_records_sql($fields . $sql . $order, array_merge($params, $sortparams));
+        $params['roleid'] = $relationship->roleid2;
+        $availableusers2 = $DB->get_records_sql($fields . $sql . $join2 . $where . $order, array_merge($params, $sortparams));
 
         if (empty($availableusers1) && empty($availableusers2)) {
             return array();
