@@ -15,8 +15,8 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
-* ionship deleted event.
-
+ * User removed from a relationship event.
+ *
  * @package    core
  * @copyright  2013 Dan Poltawski <dan@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -26,13 +26,14 @@ namespace local_relationship\event;
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * relationship deleted event class.
+ * User removed from a relationship event class.
  *
  * @package    core
  * @copyright  2013 Dan Poltawski <dan@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class relationship_deleted extends  \core\event\base {
+
+class relationshipgroup_member_removed extends  \core\event\base {
 
     /**
      * Init method.
@@ -42,7 +43,7 @@ class relationship_deleted extends  \core\event\base {
     protected function init() {
         $this->data['crud'] = 'd';
         $this->data['level'] = self::LEVEL_OTHER;
-        $this->data['objecttable'] = 'relationship';
+        $this->data['objecttable'] = 'relationship_groups';
     }
 
     /**
@@ -51,7 +52,7 @@ class relationship_deleted extends  \core\event\base {
      * @return string
      */
     public static function get_name() {
-        return get_string('event_relationship_deleted', 'local_relationship');
+        return get_string('event_relationshipgroup_member_removed', 'local_relationship');
     }
 
     /**
@@ -60,7 +61,7 @@ class relationship_deleted extends  \core\event\base {
      * @return string
      */
     public function get_description() {
-        return "Relationship {$this->objectid} was deleted by {$this->userid} from context {$this->contextid}";
+        return "User {$this->userid} removed user {$this->relateduserid} from relationshipgroup {$this->objectid}.";
     }
 
     /**
@@ -69,6 +70,6 @@ class relationship_deleted extends  \core\event\base {
      * @return \moodle_url
      */
     public function get_url() {
-        return new \moodle_url('/local/relationship/index.php', array('contextid' => $this->contextid));
+        return new \moodle_url('/local/relationship/assign.php', array('relationshipgroupid' => $this->objectid));
     }
 }

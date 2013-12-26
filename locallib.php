@@ -40,23 +40,6 @@ function relationship_get_assignable_roles($relationship) {
     return $roles;
 }
 
-function relationship_add_group($group) {
-    global $DB;
-
-    if (!isset($group->name)) {
-        throw new coding_exception('Missing group name in group_add_group().');
-    }
-    if (!isset($group->timecreated)) {
-        $group->timecreated = time();
-    }
-    if (!isset($group->timemodified)) {
-        $group->timemodified = $group->timecreated;
-    }
-
-    $group->id = $DB->insert_record('relationship_groups', $group);
-
-    return $group->id;
-}
 /**
  * Add new relationship.
  *
@@ -100,13 +83,6 @@ function relationship_add_relationship($relationship) {
     return $relationship->id;
 }
 
-function relationship_update_group($group) {
-    global $DB;
-
-    $group->timemodified = time();
-    $DB->update_record('relationship_groups', $group);
-}
-
 /**
  * Update existing relationship.
  * @param  stdClass $relationship
@@ -130,13 +106,6 @@ function relationship_update_relationship($relationship) {
     $event->trigger();
 }
 
-function relationship_delete_group($group) {
-    global $DB;
-
-    $DB->delete_records('relationship_members', array('relationshipgroupid'=>$group->id));
-    $DB->delete_records('relationship_groups', array('id'=>$group->id));
-}
-
 /**
  * Delete relationship.
  * @param  stdClass $relationship
@@ -149,7 +118,11 @@ function relationship_delete_relationship($relationship) {
         // TODO: add component delete callback
     }
 
-    $DB->delete_records('relationship_members', array('relationshipid'=>$relationship->id));
+    $relationshipgroups = $DB->get_records('relationship_groups', array('relationshipid'=>$relationship->id));
+    foreach($relationshipgroups AS $g) {
+        $DB->delete_records('relationship_members', array('relationshipgroupid'=>$g->id));
+        $DB->delete_records('relationship_groups', array('id'=>$g->id));
+    }
     $DB->delete_records('relationship', array('id'=>$relationship->id));
 
     $event = \local_relationship\event\relationship_deleted::create(array(
@@ -157,6 +130,62 @@ function relationship_delete_relationship($relationship) {
         'objectid' => $relationship->id,
     ));
     $event->add_record_snapshot('relationship', $relationship);
+    $event->trigger();
+}
+
+function relationship_add_group($relationshipgroup) {
+    global $DB;
+
+    if (!isset($relationshipgroup->name)) {
+        throw new coding_exception('Missing relationshipgroup name in relationshipgroup_add_group().');
+    }
+    if (!isset($relationshipgroup->timecreated)) {
+        $relationshipgroup->timecreated = time();
+    }
+    if (!isset($relationshipgroup->timemodified)) {
+        $relationshipgroup->timemodified = $relationshipgroup->timecreated;
+    }
+
+    $relationshipgroup->id = $DB->insert_record('relationship_groups', $relationshipgroup);
+    $relationship = $DB->get_record('relationship', array('id' => $relationshipgroup->relationshipid), '*', MUST_EXIST);
+
+    $event = \local_relationship\event\relationshipgroup_created::create(array(
+        'context' => context::instance_by_id($relationship->contextid),
+        'objectid' => $relationshipgroup->id,
+    ));
+    $event->add_record_snapshot('relationship_groups', $relationshipgroup);
+    $event->trigger();
+
+    return $relationshipgroup->id;
+}
+
+function relationship_update_group($relationshipgroup) {
+    global $DB;
+
+    $relationshipgroup->timemodified = time();
+    $DB->update_record('relationship_groups', $relationshipgroup);
+    $relationship = $DB->get_record('relationship', array('id' => $relationshipgroup->relationshipid), '*', MUST_EXIST);
+
+    $event = \local_relationship\event\relationshipgroup_updated::create(array(
+        'context' => context::instance_by_id($relationship->contextid),
+        'objectid' => $relationshipgroup->id,
+    ));
+    $event->add_record_snapshot('relationship_groups', $relationshipgroup);
+    $event->trigger();
+}
+
+function relationship_delete_group($relationshipgroup) {
+    global $DB;
+
+    $DB->delete_records('relationship_members', array('relationshipgroupid'=>$relationshipgroup->id));
+    $DB->delete_records('relationship_groups', array('id'=>$relationshipgroup->id));
+    $relationship = $DB->get_record('relationship', array('id' => $relationshipgroup->relationshipid), '*', MUST_EXIST);
+
+    $event = \local_relationship\event\relationshipgroup_deleted::create(array(
+        'context' => context::instance_by_id($relationship->contextid),
+        'objectid' => $relationshipgroup->id,
+    ));
+    $event->add_record_snapshot('relationship_groups', $relationshipgroup);
     $event->trigger();
 }
 
@@ -192,31 +221,30 @@ function relationship_delete_category($category) {
  * @param  int $userid
  * @return void
  */
-function relationship_group_add_member($relationshipgroupid, $userid, $roleid) {
+function relationshipgroup_add_member($relationshipgroupid, $userid, $roleid) {
     global $DB;
+
     if ($DB->record_exists('relationship_members', array('relationshipgroupid'=>$relationshipgroupid, 'userid'=>$userid))) {
         // No duplicates!
         return;
     }
     $record = new stdClass();
-    $record->relationshipgroupid  = $relationshipgroupid;
+    $record->relationshipgroupid = $relationshipgroupid;
     $record->userid    = $userid;
     $record->roleid    = $roleid;
     $record->timeadded = time();
     $DB->insert_record('relationship_members', $record);
 
-/*
-    $relationship = $DB->get_record('relationship', array('id' => $relationshipid), '*', MUST_EXIST);
+    $relationshipgroup = $DB->get_record('relationship_groups', array('id' => $relationshipgroupid), '*', MUST_EXIST);
+    $relationship = $DB->get_record('relationship', array('id' => $relationshipgroup->relationshipid), '*', MUST_EXIST);
 
-    $event = \local_relationship\event\relationship_member_added::create(array(
+    $event = \local_relationship\event\relationshipgroup_member_added::create(array(
         'context' => context::instance_by_id($relationship->contextid),
-        'objectid' => $relationshipid,
+        'objectid' => $relationshipgroupid,
         'relateduserid' => $userid,
-        'other' => $roleid,
     ));
-    $event->add_record_snapshot('relationship', $relationship);
+    $event->add_record_snapshot('relationship_groups', $relationshipgroup);
     $event->trigger();
-    */
 }
 
 /**
@@ -225,22 +253,21 @@ function relationship_group_add_member($relationshipgroupid, $userid, $roleid) {
  * @param  int $userid
  * @return void
  */
-function relationship_group_remove_member($relationshipgroupid, $userid) {
+function relationshipgroup_remove_member($relationshipgroupid, $userid) {
     global $DB;
 
     $DB->delete_records('relationship_members', array('relationshipgroupid'=>$relationshipgroupid, 'userid'=>$userid));
 
-/*
-    $relationship = $DB->get_record('relationship', array('id' => $relationshipid), '*', MUST_EXIST);
+    $relationshipgroup = $DB->get_record('relationship_groups', array('id' => $relationshipgroupid), '*', MUST_EXIST);
+    $relationship = $DB->get_record('relationship', array('id' => $relationshipgroup->relationshipid), '*', MUST_EXIST);
 
-    $event = \local_relationship\event\relationship_member_removed::create(array(
+    $event = \local_relationship\event\relationshipgroup_member_removed::create(array(
         'context' => context::instance_by_id($relationship->contextid),
-        'objectid' => $relationshipid,
+        'objectid' => $relationshipgroupid,
         'relateduserid' => $userid,
     ));
-    $event->add_record_snapshot('relationship', $relationship);
+    $event->add_record_snapshot('relationship_groups', $relationshipgroup);
     $event->trigger();
-    */
 }
 
 /**
@@ -249,7 +276,7 @@ function relationship_group_remove_member($relationshipgroupid, $userid) {
  * @param int $userid
  * @return bool
  */
-function relationship_group_is_member($relationshipgroupid, $userid) {
+function relationshipgroup_is_member($relationshipgroupid, $userid) {
     global $DB;
 
     return $DB->record_exists('relationship_members', array('relationshipgroupid'=>$relationshipgroupid, 'userid'=>$userid));
@@ -357,10 +384,10 @@ function relationship_get_groups($relationshipid) {
  * relationship assignment candidates
  */
 class relationship_candidate_selector extends user_selector_base {
-    protected $group;
+    protected $relationshipgroup;
 
     public function __construct($name, $options) {
-        $this->group = $options['group'];
+        $this->relationshipgroup = $options['relationshipgroup'];
         parent::__construct($name, $options);
     }
 
@@ -374,9 +401,9 @@ class relationship_candidate_selector extends user_selector_base {
 
         // By default wherecondition retrieves all users except the deleted, not confirmed and guest.
         list($wherecondition, $params) = $this->search_sql($search, 'u');
-        $relationship = $DB->get_record('relationship', array('id' => $this->group->relationshipid), '*', MUST_EXIST);
+        $relationship = $DB->get_record('relationship', array('id' => $this->relationshipgroup->relationshipid), '*', MUST_EXIST);
         $params['relationshipid'] = $relationship->id;
-        $params['relationshipgroupid'] = $this->group->id;
+        $params['relationshipgroupid'] = $this->relationshipgroup->id;
 
         $fields      = 'SELECT ' . $this->required_fields_sql('u') . ', :roleid AS roleid';
         $countfields = 'SELECT COUNT(1)';
@@ -434,7 +461,7 @@ class relationship_candidate_selector extends user_selector_base {
 
     protected function get_options() {
         $options = parent::get_options();
-        $options['relationshipid'] = $this->group->relationshipid;
+        $options['relationshipid'] = $this->relationshipgroup->relationshipid;
         $options['file'] = 'relationship/locallib.php';
         return $options;
     }
@@ -448,7 +475,7 @@ class relationship_existing_selector extends user_selector_base {
     protected $relationship;
 
     public function __construct($name, $options) {
-        $this->group = $options['group'];
+        $this->relationshipgroup = $options['relationshipgroup'];
         parent::__construct($name, $options);
     }
 
@@ -462,8 +489,8 @@ class relationship_existing_selector extends user_selector_base {
 
         // By default wherecondition retrieves all users except the deleted, not confirmed and guest.
         list($wherecondition, $params) = $this->search_sql($search, 'u');
-        $params['relationshipgroupid'] = $this->group->id;
-        $relationship = $DB->get_record('relationship', array('id' => $this->group->relationshipid), '*', MUST_EXIST);
+        $params['relationshipgroupid'] = $this->relationshipgroup->id;
+        $relationship = $DB->get_record('relationship', array('id' => $this->relationshipgroup->relationshipid), '*', MUST_EXIST);
 
         $fields      = 'SELECT ' . $this->required_fields_sql('u');
         $countfields = 'SELECT COUNT(1)';
@@ -502,7 +529,7 @@ class relationship_existing_selector extends user_selector_base {
 
     protected function get_options() {
         $options = parent::get_options();
-        $options['relationshipid'] = $this->group->relationshipid;
+        $options['relationshipid'] = $this->relationshipgroup->relationshipid;
         $options['file'] = 'relationship/locallib.php';
         return $options;
     }

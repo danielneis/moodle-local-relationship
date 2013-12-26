@@ -32,7 +32,7 @@ defined('MOODLE_INTERNAL') || die();
  * @copyright  2013 Dan Poltawski <dan@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class relationship_member_added extends  \core\event\base {
+class relationshipgroup_member_added extends  \core\event\base {
 
     /**
      * Init method.
@@ -42,7 +42,7 @@ class relationship_member_added extends  \core\event\base {
     protected function init() {
         $this->data['crud'] = 'c';
         $this->data['level'] = self::LEVEL_OTHER;
-        $this->data['objecttable'] = 'relationship';
+        $this->data['objecttable'] = 'relationship_groups';
     }
 
     /**
@@ -51,7 +51,7 @@ class relationship_member_added extends  \core\event\base {
      * @return string
      */
     public static function get_name() {
-        return get_string('event_member_added', 'local_relationship');
+        return get_string('event_relationshipgroup_member_added', 'local_relationship');
     }
 
     /**
@@ -60,7 +60,7 @@ class relationship_member_added extends  \core\event\base {
      * @return string
      */
     public function get_description() {
-        return 'User '.$this->relateduserid.' was added to relationship '.$this->objectid.' by user '.$this->userid;
+        return "User {$this->userid} added user {$this->relateduserid} to relationshipgroup {$this->objectid}.";
     }
 
     /**
@@ -69,6 +69,6 @@ class relationship_member_added extends  \core\event\base {
      * @return \moodle_url
      */
     public function get_url() {
-        return new \moodle_url('/local/relationship/assign.php', array('id' => $this->objectid));
+        return new \moodle_url('/local/relationship/assign.php', array('relationshipgroupid' => $this->objectid));
     }
 }

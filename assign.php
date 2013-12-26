@@ -25,18 +25,18 @@
 require('../../config.php');
 require_once($CFG->dirroot.'/local/relationship/locallib.php');
 
-$groupid = required_param('groupid', PARAM_INT);
+$relationshipgroupid = required_param('relationshipgroupid', PARAM_INT);
 
 require_login();
 
-$group = $DB->get_record('relationship_groups', array('id'=>$groupid), '*', MUST_EXIST);
-$relationship = $DB->get_record('relationship', array('id'=>$group->relationshipid), '*', MUST_EXIST);
+$relationshipgroup = $DB->get_record('relationship_groups', array('id'=>$relationshipgroupid), '*', MUST_EXIST);
+$relationship = $DB->get_record('relationship', array('id'=>$relationshipgroup->relationshipid), '*', MUST_EXIST);
 $context = context::instance_by_id($relationship->contextid, MUST_EXIST);
 
 require_capability('local/relationship:assign', $context);
 
 $PAGE->set_context($context);
-$PAGE->set_url('/local/relationship/assign.php', array('groupid'=>$groupid));
+$PAGE->set_url('/local/relationship/assign.php', array('relationshipgroupid'=>$relationshipgroupid));
 $PAGE->set_pagelayout('admin');
 
 $returnurl = new moodle_url('/local/relationship/index.php', array('contextid'=>$relationship->contextid));
@@ -62,13 +62,14 @@ $PAGE->set_title(get_string('relationship:assign', 'local_relationship'));
 $PAGE->set_heading($COURSE->fullname);
 
 echo $OUTPUT->header();
-echo $OUTPUT->heading(get_string('assignto', 'local_relationship', format_string($relationship->name)));
+echo $OUTPUT->heading(get_string('relationshipname', 'local_relationship', format_string($relationship->name)));
+echo $OUTPUT->heading(get_string('assignto', 'local_relationship', format_string($relationshipgroup->name)));
 
 echo $OUTPUT->notification(get_string('removeuserwarning', 'local_relationship'));
 
 // Get the user_selector we will need.
-$potentialuserselector = new relationship_candidate_selector('addselect', array('group'=>$group));
-$existinguserselector = new relationship_existing_selector('removeselect', array('group'=>$group));
+$potentialuserselector = new relationship_candidate_selector('addselect', array('relationshipgroup'=>$relationshipgroup));
+$existinguserselector = new relationship_existing_selector('removeselect', array('relationshipgroup'=>$relationshipgroup));
 
 // Process incoming user assignments to the relationship
 
@@ -77,7 +78,7 @@ if (optional_param('add', false, PARAM_BOOL) && confirm_sesskey()) {
     if (!empty($userstoassign)) {
 
         foreach ($userstoassign as $adduser) {
-            relationship_group_add_member($group->id, $adduser->id, $adduser->roleid);
+            relationshipgroup_add_member($relationshipgroup->id, $adduser->id, $adduser->roleid);
         }
 
         $potentialuserselector->invalidate_selected_users();
@@ -90,7 +91,7 @@ if (optional_param('remove', false, PARAM_BOOL) && confirm_sesskey()) {
     $userstoremove = $existinguserselector->get_selected_users();
     if (!empty($userstoremove)) {
         foreach ($userstoremove as $removeuser) {
-            relationship_group_remove_member($group->id, $removeuser->id);
+            relationshipgroup_remove_member($relationshipgroup->id, $removeuser->id);
         }
         $potentialuserselector->invalidate_selected_users();
         $existinguserselector->invalidate_selected_users();

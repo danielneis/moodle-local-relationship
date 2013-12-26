@@ -51,7 +51,7 @@ class relationship_created extends \core\event\base {
      * @return string
      */
     public static function get_name() {
-        return get_string('event_created', 'local_relationship');
+        return get_string('event_relationship_created', 'local_relationship');
     }
 
     /**
@@ -60,7 +60,7 @@ class relationship_created extends \core\event\base {
      * @return string
      */
     public function get_description() {
-        return 'relationship '.$this->objectid.' was created by '.$this->userid.' at context '.$this->contextid;
+        return "Relationship {$this->objectid} was created by {$this->userid} at context {$this->contextid}";
     }
 
     /**

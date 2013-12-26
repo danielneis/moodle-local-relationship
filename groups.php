@@ -69,26 +69,26 @@ if ($context->contextlevel == CONTEXT_COURSECAT) {
 echo $OUTPUT->header();
 
 echo $OUTPUT->heading($context->get_context_name());
-echo $OUTPUT->heading('Relationship: ' . $relationship->name);
+echo $OUTPUT->heading(get_string('relationshipgroupsof', 'local_relationship', format_string($relationship->name)));
 
-$groups = relationship_get_groups($relationshipid);
+$relationshipgroups = relationship_get_groups($relationshipid);
 $data = array();
-foreach($groups as $group) {
+foreach($relationshipgroups as $relationshipgroup) {
     $line = array();
 
-    $line[] = format_string($group->name);
-    $line[] = $group->size;
+    $line[] = format_string($relationshipgroup->name);
+    $line[] = $relationshipgroup->size;
 
     $buttons = array();
     if (empty($relationship->component)) {
         if ($manager) {
-            $buttons[] = html_writer::link(new moodle_url('/local/relationship/edit_group.php', array('groupid'=>$group->id, 'delete'=>1)),
+            $buttons[] = html_writer::link(new moodle_url('/local/relationship/edit_group.php', array('relationshipgroupid'=>$relationshipgroup->id, 'delete'=>1)),
                 html_writer::empty_tag('img', array('src'=>$OUTPUT->pix_url('t/delete'), 'alt'=>get_string('delete'), 'class'=>'iconsmall')));
-            $buttons[] = html_writer::link(new moodle_url('/local/relationship/edit_group.php', array('groupid'=>$group->id)),
+            $buttons[] = html_writer::link(new moodle_url('/local/relationship/edit_group.php', array('relationshipgroupid'=>$relationshipgroup->id)),
                 html_writer::empty_tag('img', array('src'=>$OUTPUT->pix_url('t/edit'), 'alt'=>get_string('edit'), 'class'=>'iconsmall')));
         }
         if ($manager or $canassign) {
-            $buttons[] = html_writer::link(new moodle_url('/local/relationship/assign.php', array('groupid'=>$group->id)),
+            $buttons[] = html_writer::link(new moodle_url('/local/relationship/assign.php', array('relationshipgroupid'=>$relationshipgroup->id)),
                 html_writer::empty_tag('img', array('src'=>$OUTPUT->pix_url('i/users'), 'alt'=>get_string('assign', 'local_relationship'), 'class'=>'iconsmall')));
         }
     }

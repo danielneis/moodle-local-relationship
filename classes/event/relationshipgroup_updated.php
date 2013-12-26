@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * User removed from a relationship event.
+ * relationship updated event.
  *
  * @package    core
  * @copyright  2013 Dan Poltawski <dan@moodle.com>
@@ -26,14 +26,13 @@ namespace local_relationship\event;
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * User removed from a relationship event class.
+ * relationship updated event class.
  *
  * @package    core
  * @copyright  2013 Dan Poltawski <dan@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
-class relationship_member_removed extends  \core\event\base {
+class relationshipgroup_updated extends \core\event\base {
 
     /**
      * Init method.
@@ -41,9 +40,9 @@ class relationship_member_removed extends  \core\event\base {
      * @return void
      */
     protected function init() {
-        $this->data['crud'] = 'd';
+        $this->data['crud'] = 'u';
         $this->data['level'] = self::LEVEL_OTHER;
-        $this->data['objecttable'] = 'relationship';
+        $this->data['objecttable'] = 'relationship_groups';
     }
 
     /**
@@ -52,7 +51,7 @@ class relationship_member_removed extends  \core\event\base {
      * @return string
      */
     public static function get_name() {
-        return get_string('event_member_removed', 'local_relationship');
+        return get_string('event_relationshipgroup_updated', 'local_relationship');
     }
 
     /**
@@ -61,7 +60,7 @@ class relationship_member_removed extends  \core\event\base {
      * @return string
      */
     public function get_description() {
-        return 'User '.$this->relateduserid.' was removed from relationship '.$this->objectid.' by user '.$this->userid;
+        return "Relationship group {$this->objectid} was updated by {$this->userid}";
     }
 
     /**
@@ -70,6 +69,7 @@ class relationship_member_removed extends  \core\event\base {
      * @return \moodle_url
      */
     public function get_url() {
-        return new \moodle_url('/local/relationship/assign.php', array('id' => $this->objectid));
+        return new \moodle_url('/local/relationship/groups.php', array('relationshipid' => $this->objectid));
     }
+
 }

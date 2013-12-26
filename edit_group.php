@@ -27,7 +27,7 @@ require($CFG->dirroot.'/course/lib.php');
 require($CFG->dirroot.'/local/relationship/locallib.php');
 require($CFG->dirroot.'/local/relationship/edit_group_form.php');
 
-$groupid   = optional_param('groupid', 0, PARAM_INT);
+$relationshipgroupid   = optional_param('relationshipgroupid', 0, PARAM_INT);
 $relationshipid = optional_param('relationshipid', 0, PARAM_INT);
 $delete    = optional_param('delete', 0, PARAM_BOOL);
 $confirm   = optional_param('confirm', 0, PARAM_BOOL);
@@ -35,15 +35,15 @@ $confirm   = optional_param('confirm', 0, PARAM_BOOL);
 require_login();
 
 $category = null;
-if ($groupid) {
-    $group = $DB->get_record('relationship_groups', array('id'=>$groupid), '*', MUST_EXIST);
-    $relationship = $DB->get_record('relationship', array('id'=>$group->relationshipid), '*', MUST_EXIST);
+if ($relationshipgroupid) {
+    $relationshipgroup = $DB->get_record('relationship_groups', array('id'=>$relationshipgroupid), '*', MUST_EXIST);
+    $relationship = $DB->get_record('relationship', array('id'=>$relationshipgroup->relationshipid), '*', MUST_EXIST);
 } else {
     $relationship = $DB->get_record('relationship', array('id'=>$relationshipid), '*', MUST_EXIST);
-    $group = new stdClass();
-    $group->id             = 0;
-    $group->relationshipid = $relationshipid;
-    $group->name           = '';
+    $relationshipgroup = new stdClass();
+    $relationshipgroup->id             = 0;
+    $relationshipgroup->relationshipid = $relationshipid;
+    $relationshipgroup->name           = '';
 }
 
 $context = context::instance_by_id($relationship->contextid, MUST_EXIST);
@@ -53,7 +53,7 @@ if ($context->contextlevel != CONTEXT_COURSECAT and $context->contextlevel != CO
 
 require_capability('local/relationship:manage', $context);
 
-$returnurl = new moodle_url('/local/relationship/groups.php', array('groupid'=>$group->id, 'relationshipid'=>$relationship->id));
+$returnurl = new moodle_url('/local/relationship/groups.php', array('relationshipgroupid'=>$relationshipgroup->id, 'relationshipid'=>$relationship->id));
 
 if (!empty($relationship->component)) {
     // We can not manually edit relationships that were created by external systems, sorry.
@@ -61,7 +61,7 @@ if (!empty($relationship->component)) {
 }
 
 $PAGE->set_context($context);
-$PAGE->set_url('/local/relationship/edit_group.php', array('groupid'=>$group->id, 'relationshipid'=>$relationship->id));
+$PAGE->set_url('/local/relationship/edit_group.php', array('relationshipgroupid'=>$relationshipgroup->id, 'relationshipid'=>$relationship->id));
 $PAGE->set_context($context);
 $PAGE->set_pagelayout('admin');
 
@@ -73,33 +73,33 @@ if ($context->contextlevel == CONTEXT_COURSECAT) {
     navigation_node::override_active_url(new moodle_url('/local/relationship/index.php', array()));
 }
 
-if ($delete and $group->id) {
+if ($delete and $relationshipgroup->id) {
     $PAGE->url->param('delete', 1);
     if ($confirm and confirm_sesskey()) {
-        relationship_delete_group($group);
+        relationship_delete_group($relationshipgroup);
         redirect($returnurl);
     }
-    $strheading = get_string('delgroup', 'local_relationship');
+    $strheading = get_string('delgroupof', 'local_relationship', format_string($relationship->name));
     $PAGE->navbar->add($strheading);
     $PAGE->set_title($strheading);
     $PAGE->set_heading($COURSE->fullname);
     echo $OUTPUT->header();
     echo $OUTPUT->heading($strheading);
-    $yesurl = new moodle_url('/local/relationship/edit_group.php', array('groupid'=>$group->id, 'relationshipid'=>$relationship->id, 'delete'=>1, 'confirm'=>1,'sesskey'=>sesskey()));
-    $message = get_string('delconfirmgroup', 'local_relationship', format_string($group->name));
+    $yesurl = new moodle_url('/local/relationship/edit_group.php', array('relationshipgroupid'=>$relationshipgroup->id, 'relationshipid'=>$relationship->id, 'delete'=>1, 'confirm'=>1,'sesskey'=>sesskey()));
+    $message = get_string('delconfirmgroup', 'local_relationship', format_string($relationshipgroup->name));
     echo $OUTPUT->confirm($message, $yesurl, $returnurl);
     echo $OUTPUT->footer();
     die;
 }
 
 $editoroptions = array('maxfiles'=>0, 'context'=>$context);
-$strheading = get_string('editgroup', 'local_relationship');
+$strheading = get_string('editgroupof', 'local_relationship', format_string($relationship->name));
 
 $PAGE->set_title($strheading);
 $PAGE->set_heading($COURSE->fullname);
 $PAGE->navbar->add($strheading);
 
-$editform = new group_edit_form(null, array('editoroptions'=>$editoroptions, 'data'=>$group));
+$editform = new relationshipgroup_edit_form(null, array('editoroptions'=>$editoroptions, 'data'=>$relationshipgroup));
 
 if ($editform->is_cancelled()) {
     redirect($returnurl);

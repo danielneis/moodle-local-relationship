@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * group related management functions, this file needs to be included manually.
+ * relationshipgroup related management functions, this file needs to be included manually.
  *
- * @package    core_group
+ * @package    core_relationshipgroup
  * @copyright  2010 Petr Skoda  {@link http://skodak.org}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -26,16 +26,16 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot . '/lib/formslib.php');
 
-class group_edit_form extends moodleform {
+class relationshipgroup_edit_form extends moodleform {
 
     /**
-     * Define the group edit form
+     * Define the relationshipgroup edit form
      */
     public function definition() {
 
         $mform = $this->_form;
         $editoroptions = $this->_customdata['editoroptions'];
-        $group = $this->_customdata['data'];
+        $relationshipgroup = $this->_customdata['data'];
 
         $mform->addElement('text', 'name', get_string('name', 'local_relationship'), 'maxlength="254" size="50"');
         $mform->addRule('name', get_string('required'), 'required', null, 'client');
@@ -48,7 +48,7 @@ class group_edit_form extends moodleform {
 
         $this->add_action_buttons();
 
-        $this->set_data($group);
+        $this->set_data($relationshipgroup);
     }
 
     public function validation($data, $files) {
