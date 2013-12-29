@@ -373,10 +373,22 @@ function relationship_get_groups($relationshipid) {
     global $DB;
 
     $sql = "SELECT rg.*, (SELECT count(*) FROM relationship_members WHERE relationshipgroupid = rg.id) as size
-              FROM relationship_groups rg
+              FROM {relationship_groups} rg
              WHERE rg.relationshipid = :relationshipid
           GROUP BY rg.id
           ORDER BY name";
+    return $DB->get_records_sql($sql, array('relationshipid'=>$relationshipid));
+}
+
+function relationship_get_courses($relationshipid) {
+    global $DB;
+
+    $sql = "SELECT DISTINCT c.id, c.fullname
+              FROM {enrol} e
+              JOIN {course} c ON (c.id = e.courseid)
+             WHERE e.enrol = 'relationship'
+               AND e.customint1 = :relationshipid
+          ORDER BY c.fullname";
     return $DB->get_records_sql($sql, array('relationshipid'=>$relationshipid));
 }
 

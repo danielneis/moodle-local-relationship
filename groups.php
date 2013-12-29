@@ -69,7 +69,6 @@ if ($context->contextlevel == CONTEXT_COURSECAT) {
 echo $OUTPUT->header();
 
 echo $OUTPUT->heading($context->get_context_name());
-echo $OUTPUT->heading(get_string('relationshipgroupsof', 'local_relationship', format_string($relationship->name)));
 
 $relationshipgroups = relationship_get_groups($relationshipid);
 $data = array();
@@ -105,10 +104,33 @@ $table->colclasses = array('leftalign name', 'leftalign size',
 $table->id = 'relationships';
 $table->attributes['class'] = 'admintable generaltable';
 $table->data  = $data;
-echo html_writer::table($table);
 
+echo $OUTPUT->box_start('generalbox boxaligncenter boxwidthnarrow');
+echo $OUTPUT->heading(get_string('relationshipgroups', 'local_relationship', format_string($relationship->name)));
+echo html_writer::table($table);
 if ($manager) {
     echo $OUTPUT->single_button(new moodle_url('/local/relationship/edit_group.php', array('relationshipid'=>$relationshipid)), get_string('add'));
 }
+echo $OUTPUT->box_end();
+
+$relationshipcourses = relationship_get_courses($relationshipid);
+$data = array();
+foreach($relationshipcourses as $rc) {
+    $enrol_url = new moodle_url('/enrol/instances.php', array('id'=>$rc->id));
+    $enrol_link = html_writer::link($enrol_url, format_string($rc->fullname), array('target'=>'_new'));
+    $data[] = array($enrol_link);
+}
+
+$table = new html_table();
+$table->head  = array(get_string('fullname'));
+$table->colclasses = array('leftalign name');
+$table->id = 'relationships courses';
+$table->attributes['class'] = 'admintable generaltable';
+$table->data = $data;
+
+echo $OUTPUT->box_start('generalbox boxaligncenter boxwidthnarrow');
+echo $OUTPUT->heading(get_string('relationshipcourses', 'local_relationship', format_string($relationship->name)));
+echo html_writer::table($table);
+echo $OUTPUT->box_end();
 
 echo $OUTPUT->footer();
