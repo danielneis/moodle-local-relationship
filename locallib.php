@@ -17,7 +17,7 @@
 /**
  * relationship UI related functions and classes.
  *
- * @package    core_relationship
+ * @package    local_relationship
  * @copyright  2012 Petr Skoda  {@link http://skodak.org}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -233,7 +233,7 @@ function relationshipgroup_add_member($relationshipgroupid, $userid, $roleid) {
     $record->userid    = $userid;
     $record->roleid    = $roleid;
     $record->timeadded = time();
-    $DB->insert_record('relationship_members', $record);
+    $record->id = $DB->insert_record('relationship_members', $record);
 
     $relationshipgroup = $DB->get_record('relationship_groups', array('id' => $relationshipgroupid), '*', MUST_EXIST);
     $relationship = $DB->get_record('relationship', array('id' => $relationshipgroup->relationshipid), '*', MUST_EXIST);
@@ -242,7 +242,9 @@ function relationshipgroup_add_member($relationshipgroupid, $userid, $roleid) {
         'context' => context::instance_by_id($relationship->contextid),
         'objectid' => $relationshipgroupid,
         'relateduserid' => $userid,
+        'other' => $roleid,
     ));
+    $event->add_record_snapshot('relationship', $relationship);
     $event->add_record_snapshot('relationship_groups', $relationshipgroup);
     $event->trigger();
 }
@@ -266,6 +268,7 @@ function relationshipgroup_remove_member($relationshipgroupid, $userid) {
         'objectid' => $relationshipgroupid,
         'relateduserid' => $userid,
     ));
+    $event->add_record_snapshot('relationship', $relationship);
     $event->add_record_snapshot('relationship_groups', $relationshipgroup);
     $event->trigger();
 }

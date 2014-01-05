@@ -17,7 +17,7 @@
 /**
  * relationship related management functions, this file needs to be included manually.
  *
- * @package    core_relationship
+ * @package    local_relationship
  * @copyright  2010 Petr Skoda  {@link http://skodak.org}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -105,7 +105,6 @@ if ($editform->is_cancelled()) {
     redirect($returnurl);
 
 } else if ($data = $editform->get_data()) {
-    // $data = file_postupdate_standard_editor($data, 'description', $editoroptions, $context);
     if ($data->id) {
         relationship_update_group($data);
     } else {

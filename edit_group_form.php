@@ -17,7 +17,7 @@
 /**
  * relationshipgroup related management functions, this file needs to be included manually.
  *
- * @package    core_relationshipgroup
+ * @package    local_relationship
  * @copyright  2010 Petr Skoda  {@link http://skodak.org}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */

@@ -18,7 +18,7 @@
 /**
  * Strings for component 'relationship'
  *
- * @package    moodlecore
+ * @package    local_relationship
  * @subpackage relationship
  * @copyright  2010 Petr Skoda (info@skodak.org)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later

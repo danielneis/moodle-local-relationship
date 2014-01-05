@@ -17,7 +17,7 @@
 /**
  * User removed from a relationship event.
  *
- * @package    core
+ * @package    local
  * @copyright  2013 Dan Poltawski <dan@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -28,7 +28,7 @@ defined('MOODLE_INTERNAL') || die();
 /**
  * User removed from a relationship event class.
  *
- * @package    core
+ * @package    local
  * @copyright  2013 Dan Poltawski <dan@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
