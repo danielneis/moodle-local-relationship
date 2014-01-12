@@ -29,21 +29,36 @@ $string['role1'] = 'Role 1';
 $string['role2'] = 'Role 2';
 $string['cohort1'] = 'Cohort 1';
 $string['cohort2'] = 'Cohort 2';
+$string['allocated'] = ' (already assigned in other group)';
+$string['notallocated'] = ' (not yet assigned)';
+$string['viewreport'] = 'View';
+
+$string['cohortid1'] = 'Cohort 1';
+$string['cohortid1_help'] = 'Only members from this cohort may have role 1 assigned to.
+   These members are people qualified to teach or provide tutoring to students.
+   In general there is only one person with this role in each group.';
+$string['cohortid2'] = 'Cohort 2';
+$string['cohortid2_help'] = 'Only members from this cohort may have role 2 assigned to.
+   These members (students for instance) are people who receive attention from cohort1 members. 
+   Each member of this cohort is assigned to only one group.';
 
 $string['addgroup'] = 'Add new group';
+$string['addgroups'] = 'Add groups';
+$string['addgroupstitle'] = 'Add groups on relationship \'{$a}\'';
 $string['addrelationship'] = 'Add new relationship';
 $string['anyrelationship'] = 'Any';
 $string['assign'] = 'Assign';
 $string['courses'] = 'Courses';
 $string['assignto'] = 'Relationship group \'{$a}\' members';
+$string['backtorelationship'] = 'Back to the relationship';
 $string['backtorelationships'] = 'Back to relationships';
 $string['bulkadd'] = 'Add to relationship';
 $string['bulknorelationship'] = 'No available relationships found';
 $string['relationshipname'] = 'Relationship \'{$a}\'';
 $string['relationship'] = 'relationship';
 $string['relationships'] = 'relationships';
-$string['relationshipgroups'] = 'Relationship groups of \'{$a}\'';
-$string['relationshipcourses'] = 'Relationship courses of \'{$a}\'';
+$string['relationshipgroups'] = 'Group list of relationship \'{$a}\'';
+$string['relationshipcourses'] = 'Course list for this relationship';
 $string['relationshipsin'] = '{$a}: available relationships';
 $string['relationship:assign'] = 'Assign relationship group members';
 $string['relationship:manage'] = 'Manage relationships';
@@ -71,10 +86,13 @@ $string['external'] = 'External relationship';
 $string['idnumber'] = 'Relationship ID';
 $string['memberscount'] = 'Size';
 $string['name'] = 'Name';
+$string['groupname'] = 'Group name';
+$string['groupname_pattern'] = 'Group name pattern';
 $string['nocomponent'] = 'Created manually';
 $string['potusers'] = 'Potential users';
 $string['potusersmatching'] = 'Potential matching users';
 $string['removeuserwarning'] = 'Removing users from a relationship may result in unenrolling of users from multiple courses which includes deleting of user settings, grades, group membership and other user information from affected courses.';
+$string['removegroupwarning'] = 'Removing group from a relationship may result in unenrolling of users from multiple courses which includes deleting of user settings, grades, group membership and other user information from affected courses.';
 $string['selectfromrelationship'] = 'Select members from relationship';
 $string['unknownrelationship'] = 'Unknown relationship ({$a})!';
 $string['useradded'] = 'User added to relationship "{$a}"';

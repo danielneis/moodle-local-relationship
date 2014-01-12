@@ -98,12 +98,35 @@ function relationship_update_relationship($relationship) {
     $relationship->timemodified = time();
     $DB->update_record('relationship', $relationship);
 
+    $sql = "UPDATE {relationship} r
+              JOIN {relationship_groups} rg ON (rg.relationshipid = r.id)
+              JOIN {relationship_members} rm ON (rm.relationshipgroupid = rg.id)
+               SET rm.roleid = IF(rm.roletype = 1, r.roleid1, r.roleid2)
+             WHERE r.id = :relationshipid";
+    $DB->execute($sql, array('relationshipid'=>$relationship->id));
+
     $event = \local_relationship\event\relationship_updated::create(array(
         'context' => context::instance_by_id($relationship->contextid),
         'objectid' => $relationship->id,
     ));
     $event->add_record_snapshot('relationship', $relationship);
     $event->trigger();
+}
+
+function relationship_sync_members($relationship) {
+    global $DB;
+
+    if (property_exists($relationship, 'component') and empty($relationship->component)) {
+        // prevent NULLs
+        $relationship->component = '';
+    }
+
+    $sql = "UPDATE {relationship} r
+              JOIN {relationship_groups} rg ON (rg.relationshipid = r.id)
+              JOIN {relationship_members} rm ON (rm.relationshipgroupid = rg.id)
+               SET rm.roleid = IF(rm.roletype = 1, r.roleid1, r.roleid2)
+             WHERE r.id = :relationshipid";
+    $DB->execute($sql, array('relationshipid'=>$relationship->id));
 }
 
 /**
@@ -228,15 +251,17 @@ function relationshipgroup_add_member($relationshipgroupid, $userid, $roleid) {
         // No duplicates!
         return;
     }
+
+    $relationshipgroup = $DB->get_record('relationship_groups', array('id' => $relationshipgroupid), '*', MUST_EXIST);
+    $relationship = $DB->get_record('relationship', array('id' => $relationshipgroup->relationshipid), '*', MUST_EXIST);
+
     $record = new stdClass();
     $record->relationshipgroupid = $relationshipgroupid;
     $record->userid    = $userid;
     $record->roleid    = $roleid;
+    $record->roletype  = ($roleid == $relationship->roleid1) ? 1 : 2;
     $record->timeadded = time();
     $record->id = $DB->insert_record('relationship_members', $record);
-
-    $relationshipgroup = $DB->get_record('relationship_groups', array('id' => $relationshipgroupid), '*', MUST_EXIST);
-    $relationship = $DB->get_record('relationship', array('id' => $relationshipgroup->relationshipid), '*', MUST_EXIST);
 
     $event = \local_relationship\event\relationshipgroup_member_added::create(array(
         'context' => context::instance_by_id($relationship->contextid),
@@ -426,12 +451,18 @@ class relationship_candidate_selector extends user_selector_base {
         $sql = " FROM {cohort} ch
                  JOIN {cohort_members} chm ON (chm.cohortid = ch.id)
                  JOIN {user} u ON (u.id = chm.userid)";
-        $join1 = " LEFT JOIN (SELECT DISTINCT rm.userid
+        $join_nalloc_grp = " JOIN (SELECT DISTINCT rm.userid
+                              FROM {relationship} rs
+                              JOIN {relationship_groups} rg ON (rg.relationshipid = rs.id)
+                              JOIN {relationship_members} rm ON (rm.relationshipgroupid = rg.id)
+                             WHERE rs.id = :relationshipid) jrm1
+                          ON (jrm1.userid = u.id)
+                        LEFT JOIN (SELECT DISTINCT rm.userid
                               FROM {relationship_groups} rg
                               JOIN {relationship_members} rm ON (rm.relationshipgroupid = rg.id)
                              WHERE rg.id = :relationshipgroupid) jrm
-                        ON (jrm.userid = u.id)";
-        $join2 = " LEFT JOIN (SELECT DISTINCT rm.userid
+                          ON (jrm.userid = u.id)";
+        $join_nalloc_all = " LEFT JOIN (SELECT DISTINCT rm.userid
                               FROM {relationship} rs
                               JOIN {relationship_groups} rg ON (rg.relationshipid = rs.id)
                               JOIN {relationship_members} rm ON (rm.relationshipgroupid = rg.id)
@@ -446,30 +477,32 @@ class relationship_candidate_selector extends user_selector_base {
 
         if (!$this->is_validating()) {
             $params['cohortid'] = $relationship->cohortid1;
-            $potentialmemberscount = $DB->count_records_sql($countfields . $sql . $join1 . $where, $params);
+            $potentialmemberscount = $DB->count_records_sql($countfields . $sql . $join_nalloc_all . $where, $params);
+            $potentialmemberscount += $DB->count_records_sql($countfields . $sql . $join_nalloc_grp . $where, $params);
             $params['cohortid'] = $relationship->cohortid2;
-            $potentialmemberscount += $DB->count_records_sql($countfields . $sql . $join2 . $where, $params);
+            $potentialmemberscount += $DB->count_records_sql($countfields . $sql . $join_nalloc_all . $where, $params);
             if ($potentialmemberscount > $this->maxusersperpage) {
                 return $this->too_many_results($search, $potentialmemberscount);
+            } else if ($potentialmemberscount == 0) {
+                return array();
             }
         }
 
+        $users = array();
+
+        $role = $DB->get_record('role', array('id'=>$relationship->roleid1), '*', MUST_EXIST);
         $params['cohortid'] = $relationship->cohortid1;
         $params['roleid'] = $relationship->roleid1;
-        $availableusers1 = $DB->get_records_sql($fields . $sql . $join1 . $where . $order, array_merge($params, $sortparams));
+        $availableusers1_nalloc = $DB->get_records_sql($fields . $sql . $join_nalloc_all . $where . $order, array_merge($params, $sortparams));
+        $users[role_get_name($role) . get_string('notallocated', 'local_relationship')] = $availableusers1_nalloc;
+        $availableusers1_alloc = $DB->get_records_sql($fields . $sql . $join_nalloc_grp . $where . $order, array_merge($params, $sortparams));
+        $users[role_get_name($role) . get_string('allocated', 'local_relationship')] = $availableusers1_alloc;
+
+        $role = $DB->get_record('role', array('id'=>$relationship->roleid2), '*', MUST_EXIST);
         $params['cohortid'] = $relationship->cohortid2;
         $params['roleid'] = $relationship->roleid2;
-        $availableusers2 = $DB->get_records_sql($fields . $sql . $join2 . $where . $order, array_merge($params, $sortparams));
-
-        if (empty($availableusers1) && empty($availableusers2)) {
-            return array();
-        }
-
-        $users = array();
-        $role = $DB->get_record('role', array('id'=>$relationship->roleid1), '*', MUST_EXIST);
-        $users[role_get_name($role)] = $availableusers1;
-        $role = $DB->get_record('role', array('id'=>$relationship->roleid2), '*', MUST_EXIST);
-        $users[role_get_name($role)] = $availableusers2;
+        $availableusers2 = $DB->get_records_sql($fields . $sql . $join_nalloc_all . $where . $order, array_merge($params, $sortparams));
+        $users[role_get_name($role) . get_string('notallocated', 'local_relationship')] = $availableusers2;
 
         return $users;
     }

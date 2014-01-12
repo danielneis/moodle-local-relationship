@@ -27,7 +27,7 @@ require($CFG->dirroot.'/course/lib.php');
 require($CFG->dirroot.'/local/relationship/locallib.php');
 require($CFG->dirroot.'/local/relationship/edit_form.php');
 
-$id        = optional_param('id', 0, PARAM_INT);
+$relationshipid = optional_param('relationshipid', 0, PARAM_INT);
 $contextid = optional_param('contextid', 0, PARAM_INT);
 $delete    = optional_param('delete', 0, PARAM_BOOL);
 $confirm   = optional_param('confirm', 0, PARAM_BOOL);
@@ -35,8 +35,8 @@ $confirm   = optional_param('confirm', 0, PARAM_BOOL);
 require_login();
 
 $category = null;
-if ($id) {
-    $relationship = $DB->get_record('relationship', array('id'=>$id), '*', MUST_EXIST);
+if ($relationshipid) {
+    $relationship = $DB->get_record('relationship', array('id'=>$relationshipid), '*', MUST_EXIST);
     $context = context::instance_by_id($relationship->contextid, MUST_EXIST);
 } else {
     $context = context::instance_by_id($contextid, MUST_EXIST);
@@ -61,7 +61,6 @@ if (!empty($relationship->component)) {
 
 $PAGE->set_context($context);
 $PAGE->set_url('/local/relationship/edit.php', array('contextid'=>$context->id, 'id'=>$relationship->id));
-$PAGE->set_context($context);
 $PAGE->set_pagelayout('admin');
 
 if ($context->contextlevel == CONTEXT_COURSECAT) {
@@ -84,7 +83,7 @@ if ($delete and $relationship->id) {
     $PAGE->set_heading($COURSE->fullname);
     echo $OUTPUT->header();
     echo $OUTPUT->heading($strheading);
-    $yesurl = new moodle_url('/local/relationship/edit.php', array('id'=>$relationship->id, 'delete'=>1, 'confirm'=>1,'sesskey'=>sesskey()));
+    $yesurl = new moodle_url('/local/relationship/edit.php', array('relationshipid'=>$relationship->id, 'delete'=>1, 'confirm'=>1,'sesskey'=>sesskey()));
     $message = get_string('delconfirm', 'local_relationship', format_string($relationship->name));
     echo $OUTPUT->confirm($message, $yesurl, $returnurl);
     echo $OUTPUT->footer();
@@ -128,5 +127,30 @@ if ($editform->is_cancelled()) {
 echo $OUTPUT->header();
 echo $OUTPUT->heading($strheading);
 echo $editform->display();
+
+// ---------------------------------------------------------------------------------------------
+// Show related courses
+if ($relationship->id) {
+    $relationshipcourses = relationship_get_courses($relationship->id);
+    $data = array();
+    foreach($relationshipcourses as $rc) {
+        $enrol_url = new moodle_url('/enrol/instances.php', array('id'=>$rc->id));
+        $enrol_link = html_writer::link($enrol_url, format_string($rc->fullname), array('target'=>'_new'));
+        $data[] = array($enrol_link);
+    }
+
+    $table = new html_table();
+    $table->head  = array(get_string('fullname'));
+    $table->colclasses = array('leftalign name');
+    $table->id = 'relationships courses';
+    $table->attributes['class'] = 'admintable generaltable';
+    $table->data = $data;
+
+    echo $OUTPUT->box_start('generalbox boxaligncenter boxwidthnarrow');
+    echo $OUTPUT->heading(get_string('relationshipcourses', 'local_relationship', format_string($relationship->name)));
+    echo html_writer::table($table);
+    echo $OUTPUT->box_end();
+}
+
 echo $OUTPUT->footer();
 

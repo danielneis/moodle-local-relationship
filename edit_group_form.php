@@ -37,7 +37,7 @@ class relationshipgroup_edit_form extends moodleform {
         $editoroptions = $this->_customdata['editoroptions'];
         $relationshipgroup = $this->_customdata['data'];
 
-        $mform->addElement('text', 'name', get_string('name', 'local_relationship'), 'maxlength="254" size="50"');
+        $mform->addElement('text', 'name', get_string('groupname', 'local_relationship'), 'maxlength="254" size="50"');
         $mform->addRule('name', get_string('required'), 'required', null, 'client');
         $mform->setType('name', PARAM_TEXT);
 

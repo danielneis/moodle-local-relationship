@@ -39,7 +39,7 @@ $PAGE->set_context($context);
 $PAGE->set_url('/local/relationship/assign.php', array('relationshipgroupid'=>$relationshipgroupid));
 $PAGE->set_pagelayout('admin');
 
-$returnurl = new moodle_url('/local/relationship/index.php', array('contextid'=>$relationship->contextid));
+$returnurl = new moodle_url('/local/relationship/groups.php', array('relationshipid'=>$relationship->id));
 
 if (!empty($relationship->component)) {
     // We can not manually edit relationships that were created by external systems, sorry.
@@ -76,11 +76,9 @@ $existinguserselector = new relationship_existing_selector('removeselect', array
 if (optional_param('add', false, PARAM_BOOL) && confirm_sesskey()) {
     $userstoassign = $potentialuserselector->get_selected_users();
     if (!empty($userstoassign)) {
-
         foreach ($userstoassign as $adduser) {
             relationshipgroup_add_member($relationshipgroup->id, $adduser->id, $adduser->roleid);
         }
-
         $potentialuserselector->invalidate_selected_users();
         $existinguserselector->invalidate_selected_users();
     }
@@ -112,7 +110,6 @@ if (optional_param('remove', false, PARAM_BOOL) && confirm_sesskey()) {
       <td id="buttonscell">
           <div id="addcontrols">
               <input name="add" id="add" type="submit" value="<?php echo $OUTPUT->larrow().'&nbsp;'.s(get_string('add')); ?>" title="<?php p(get_string('add')); ?>" /><br />
-
           </div>
 
           <div id="removecontrols">
@@ -125,7 +122,7 @@ if (optional_param('remove', false, PARAM_BOOL) && confirm_sesskey()) {
       </td>
     </tr>
     <tr><td colspan="3" id='backcell'>
-      <input type="submit" name="cancel" value="<?php p(get_string('backtorelationships', 'local_relationship')); ?>" />
+      <input type="submit" name="cancel" value="<?php p(get_string('backtorelationship', 'local_relationship')); ?>" />
     </td></tr>
   </table>
 </div></form>

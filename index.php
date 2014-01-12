@@ -146,14 +146,18 @@ foreach($relationships['relationships'] as $relationship) {
     $buttons = array();
     if (empty($relationship->component)) {
         if ($manager) {
-            $buttons[] = html_writer::link(new moodle_url('/local/relationship/edit.php', array('id'=>$relationship->id, 'delete'=>1)),
-                html_writer::empty_tag('img', array('src'=>$OUTPUT->pix_url('t/delete'), 'alt'=>get_string('delete'), 'class'=>'iconsmall')));
-            $buttons[] = html_writer::link(new moodle_url('/local/relationship/edit.php', array('id'=>$relationship->id)),
-                html_writer::empty_tag('img', array('src'=>$OUTPUT->pix_url('t/edit'), 'alt'=>get_string('edit'), 'class'=>'iconsmall')));
-            $buttons[] = html_writer::link(new moodle_url('/local/relationship/groups.php', array('relationshipid'=>$relationship->id)),
-                html_writer::empty_tag('img', array('src'=>$OUTPUT->pix_url('i/users'), 'alt'=>get_string('assign', 'local_relationship'), 'class'=>'iconsmall')));
+            if(!$DB->record_exists('enrol', array('enrol'=>'relationship', 'customint1'=>$relationship->id))) {
+                $buttons[] = html_writer::link(new moodle_url('/local/relationship/edit.php', array('relationshipid'=>$relationship->id, 'delete'=>1)),
+                    html_writer::empty_tag('img', array('src'=>$OUTPUT->pix_url('t/delete'), 'alt'=>get_string('delete'), 'title'=>get_string('delete'), 'class'=>'iconsmall')));
+            }
+            $buttons[] = html_writer::link(new moodle_url('/local/relationship/edit.php', array('relationshipid'=>$relationship->id)),
+                html_writer::empty_tag('img', array('src'=>$OUTPUT->pix_url('t/edit'), 'alt'=>get_string('edit'), 'title'=>get_string('edit'), 'class'=>'iconsmall')));
         }
     }
+    $buttons[] = html_writer::link(new moodle_url('/local/relationship/groups.php', array('relationshipid'=>$relationship->id)),
+        html_writer::empty_tag('img', array('src'=>$OUTPUT->pix_url('t/groups'), 'alt'=>get_string('groups'), 'title'=>get_string('groups'), 'class'=>'iconsmall')));
+    $buttons[] = html_writer::link(new moodle_url('/local/relationship/view.php', array('relationshipid'=>$relationship->id)),
+        html_writer::empty_tag('img', array('src'=>$OUTPUT->pix_url('i/report'), 'alt'=>get_string('viewreport', 'local_relationship'), 'title'=>get_string('viewreport', 'local_relationship'), 'class'=>'iconsmall')));
     $line[] = implode(' ', $buttons);
 
     $data[] = $line;

@@ -85,6 +85,7 @@ if ($delete and $relationshipgroup->id) {
     $PAGE->set_heading($COURSE->fullname);
     echo $OUTPUT->header();
     echo $OUTPUT->heading($strheading);
+    echo $OUTPUT->notification(get_string('removegroupwarning', 'local_relationship'));
     $yesurl = new moodle_url('/local/relationship/edit_group.php', array('relationshipgroupid'=>$relationshipgroup->id, 'relationshipid'=>$relationship->id, 'delete'=>1, 'confirm'=>1,'sesskey'=>sesskey()));
     $message = get_string('delconfirmgroup', 'local_relationship', format_string($relationshipgroup->name));
     echo $OUTPUT->confirm($message, $yesurl, $returnurl);
