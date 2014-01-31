@@ -31,6 +31,7 @@ $relationshipid = optional_param('relationshipid', 0, PARAM_INT);
 $contextid = optional_param('contextid', 0, PARAM_INT);
 $delete    = optional_param('delete', 0, PARAM_BOOL);
 $confirm   = optional_param('confirm', 0, PARAM_BOOL);
+$disable_uniformdistribution = optional_param('disable_uniformdistribution', -1, PARAM_INT);
 
 require_login();
 
@@ -56,6 +57,12 @@ $returnurl = new moodle_url('/local/relationship/index.php', array('contextid'=>
 
 if (!empty($relationship->component)) {
     // We can not manually edit relationships that were created by external systems, sorry.
+    redirect($returnurl);
+}
+
+if ($disable_uniformdistribution != -1 and $relationship->id) {
+    $DB->set_field('relationship', 'disableuniformdistribution', $disable_uniformdistribution == 1 ? 1 : 0,
+                        array('id'=>$relationship->id));
     redirect($returnurl);
 }
 
@@ -95,7 +102,6 @@ if ($relationship->id) {
     // Edit existing.
     $relationship = file_prepare_standard_editor($relationship, 'description', $editoroptions, $context);
     $strheading = get_string('editrelationship', 'local_relationship');
-
 } else {
     // Add new.
     $relationship = file_prepare_standard_editor($relationship, 'description', $editoroptions, $context);
@@ -117,6 +123,7 @@ if ($editform->is_cancelled()) {
     if ($data->id) {
         relationship_update_relationship($data);
     } else {
+        $data->disableuniformdistribution = 1;
         relationship_add_relationship($data);
     }
 

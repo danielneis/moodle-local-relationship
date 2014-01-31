@@ -27,6 +27,7 @@ require($CFG->dirroot.'/local/relationship/locallib.php');
 require_once($CFG->libdir.'/adminlib.php');
 
 $relationshipid = required_param('relationshipid', PARAM_INT);
+$disable_uniformdistribution = optional_param('disable_uniformdistribution', -1, PARAM_INT);
 $page = optional_param('page', 0, PARAM_INT);
 
 require_login();
@@ -70,6 +71,21 @@ echo $OUTPUT->header();
 
 echo $OUTPUT->heading($context->get_context_name());
 
+if($manager AND $relationship->uniformdistribution == 1 AND $disable_uniformdistribution != -1) {
+    $relationship->disableuniformdistribution = $disable_uniformdistribution == 1 ? 1 : 0;
+    $DB->set_field('relationship', 'disableuniformdistribution', $relationship->disableuniformdistribution,
+                        array('id'=>$relationship->id));
+}
+
+if($relationship->uniformdistribution == 1 AND $relationship->disableuniformdistribution  == 0) {
+    $yesurl = new moodle_url('/local/relationship/groups.php', array('relationshipid'=>$relationship->id, 'disable_uniformdistribution'=>1));
+    $message = get_string('tochangegroups', 'local_relationship', format_string($relationship->name));
+    $returnurl = new moodle_url('/local/relationship/index.php', array('contextid'=>$context->id));
+    echo $OUTPUT->confirm($message, $yesurl, $returnurl);
+    echo $OUTPUT->footer();
+    die;
+}
+
 $relationshipgroups = relationship_get_groups($relationshipid);
 $data = array();
 foreach($relationshipgroups as $relationshipgroup) {
@@ -77,6 +93,17 @@ foreach($relationshipgroups as $relationshipgroup) {
 
     $line[] = format_string($relationshipgroup->name);
     $line[] = $relationshipgroup->size;
+
+    if($relationship->uniformdistribution == 1) {
+        $str_ud = $relationshipgroup->disableuniformdistribution == 1 ?  get_string('disabled', 'local_relationship') : get_string('enabled', 'local_relationship');
+        if($relationshipgroup->disableuniformdistribution == 1) {
+            $link = html_writer::link(new moodle_url('/local/relationship/edit_group.php', array('relationshipgroupid'=>$relationshipgroup->id, 'disable_uniformdistribution'=>0)), get_string('enable'));
+        } else {
+            $link = html_writer::link(new moodle_url('/local/relationship/edit_group.php', array('relationshipgroupid'=>$relationshipgroup->id, 'disable_uniformdistribution'=>1)), get_string('disable'));
+        }
+        $str_ud .= " ({$link})";
+        $line[] = $str_ud;
+    }
 
     $buttons = array();
     if (empty($relationship->component)) {
@@ -97,15 +124,20 @@ foreach($relationshipgroups as $relationshipgroup) {
 }
 $table = new html_table();
 $table->head  = array(get_string('name', 'local_relationship'),
-                      get_string('memberscount', 'local_relationship'),
-                      get_string('edit'));
-$table->colclasses = array('leftalign name', 'leftalign size',
-                           'centeralign source', 'centeralign action');
+                      get_string('memberscount', 'local_relationship'));
+$table->colclasses = array('leftalign name', 'leftalign size');
+if($relationship->uniformdistribution == 1) {
+    $table->head[] = get_string('uniformdistribute', 'local_relationship');
+    $table->colclasses[] = 'centeralign uniformdistribute';
+}
+$table->head[] = get_string('edit');
+$table->colclasses[] = 'centeralign action';
+
 $table->id = 'relationships';
 $table->attributes['class'] = 'admintable generaltable';
 $table->data  = $data;
 
-echo $OUTPUT->box_start('generalbox boxaligncenter boxwidthnarrow');
+echo $OUTPUT->box_start('generalbox boxaligncenter boxwidthwide');
 echo $OUTPUT->heading(get_string('relationshipgroups', 'local_relationship', format_string($relationship->name)));
 echo html_writer::table($table);
 if ($manager && empty($relationship->component)) {

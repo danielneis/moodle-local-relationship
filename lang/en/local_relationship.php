@@ -32,6 +32,12 @@ $string['cohort2'] = 'Cohort 2';
 $string['allocated'] = ' (already assigned in other group)';
 $string['notallocated'] = ' (not yet assigned)';
 $string['viewreport'] = 'View';
+$string['uniformdistribute'] = 'Uniformly distribute';
+$string['uniformdistribution'] = 'Uniformly distribute cohort 2 members';
+$string['enable_uniformdistribution'] = 'Enable uniform distribution';
+$string['disable_uniformdistribution'] = 'Disable uniform distribution';
+$string['enabled'] = 'enabled';
+$string['disabled'] = 'disabled';
 
 $string['cohortid1'] = 'Cohort 1';
 $string['cohortid1_help'] = 'Only members from this cohort may have role 1 assigned to.
@@ -41,6 +47,8 @@ $string['cohortid2'] = 'Cohort 2';
 $string['cohortid2_help'] = 'Only members from this cohort may have role 2 assigned to.
    These members (students for instance) are people who receive attention from cohort1 members. 
    Each member of this cohort is assigned to only one group.';
+$string['tochangegroups'] = 'To change groups from relationship \'{$a}\' it\'s necessary first disable the uniform distribution of members.
+   Later you will have to re-enable it manually.<BR><BR>Would you like to disable the uniform distribution for relationship \'{$a}\'?';
 
 $string['addgroup'] = 'Add new group';
 $string['addgroups'] = 'Add groups';

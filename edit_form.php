@@ -50,9 +50,13 @@ class relationship_edit_form extends moodleform {
         $mform->addElement('select', 'cohortid1', get_string('cohort1', 'local_relationship'), $cohort_options);
         $mform->addHelpButton('cohortid1', 'cohortid1', 'local_relationship');
         $mform->addElement('select', 'roleid1', get_string('role1', 'local_relationship'), $role_options);
+
         $mform->addElement('select', 'cohortid2', get_string('cohort2', 'local_relationship'), $cohort_options);
         $mform->addHelpButton('cohortid2', 'cohortid2', 'local_relationship');
         $mform->addElement('select', 'roleid2', get_string('role2', 'local_relationship'), $role_options);
+
+        $mform->addElement('selectyesno', 'uniformdistribution', get_string('uniformdistribution', 'local_relationship'));
+
         if(!empty($relationship->id)) {
             $mform->setConstant('cohortid1', $relationship->cohortid1);
             $mform->hardFreeze('cohortid1', $relationship->cohortid1);

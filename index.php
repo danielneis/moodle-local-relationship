@@ -107,7 +107,6 @@ foreach($relationships['relationships'] as $relationship) {
     $line = array();
 
     $line[] = format_string($relationship->name);
-    $line[] = format_text($relationship->description, $relationship->descriptionformat);
 
     $sql = "SELECT count(DISTINCT rm.userid)
               FROM relationship_groups rg
@@ -137,11 +136,20 @@ foreach($relationships['relationships'] as $relationship) {
         $line[] = '?';
     }
 
-    if (empty($relationship->component)) {
-        $line[] = get_string('nocomponent', 'local_relationship');
-    } else {
-        $line[] = get_string('pluginname', $relationship->component);
+    $line[] = empty($relationship->component) ? get_string('nocomponent', 'local_relationship') : get_string('pluginname', $relationship->component);
+
+    $str_ud = $relationship->uniformdistribution == 1 ?  get_string('yes') : get_string('no');
+    if($relationship->uniformdistribution == 1) {
+        $str_ud .= ' -> ';
+        $str_ud .= $relationship->disableuniformdistribution == 1 ?  get_string('disabled', 'local_relationship') : get_string('enabled', 'local_relationship');
+        if($relationship->disableuniformdistribution == 1) {
+            $link = html_writer::link(new moodle_url('/local/relationship/edit.php', array('relationshipid'=>$relationship->id, 'disable_uniformdistribution'=>0)), get_string('enable'));
+        } else {
+            $link = html_writer::link(new moodle_url('/local/relationship/edit.php', array('relationshipid'=>$relationship->id, 'disable_uniformdistribution'=>1)), get_string('disable'));
+        }
+        $str_ud .= " ({$link})";
     }
+    $line[] = $str_ud;
 
     $buttons = array();
     if (empty($relationship->component)) {
@@ -163,13 +171,14 @@ foreach($relationships['relationships'] as $relationship) {
     $data[] = $line;
 }
 $table = new html_table();
-$table->head  = array(get_string('name', 'local_relationship'), get_string('description', 'local_relationship'),
+$table->head  = array(get_string('name', 'local_relationship'),
                       get_string('memberscount', 'local_relationship'),
                       get_string('cohort1', 'local_relationship'),
                       get_string('role1', 'local_relationship'),
                       get_string('cohort2', 'local_relationship'),
                       get_string('role2', 'local_relationship'),
                       get_string('component', 'local_relationship'),
+                      get_string('uniformdistribute', 'local_relationship'),
                       get_string('edit'));
 $table->colclasses = array('leftalign name', 'leftalign description', 'leftalign size',
                            'leftalign cohort', 'leftalign role',

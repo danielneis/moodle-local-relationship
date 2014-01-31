@@ -2,6 +2,8 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+require_once('locallib.php');
+
 function local_relationship_extends_settings_navigation(navigation_node $navigation) {
     global $PAGE;
 
@@ -13,4 +15,10 @@ function local_relationship_extends_settings_navigation(navigation_node $navigat
                        new moodle_url('/local/relationship/index.php', array('contextid' => $PAGE->context->id)));
         }
     }
+}
+
+
+function local_relationship_cron() {
+    uniformly_distribute_members();
+    return true;
 }

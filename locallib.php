@@ -113,22 +113,6 @@ function relationship_update_relationship($relationship) {
     $event->trigger();
 }
 
-function relationship_sync_members($relationship) {
-    global $DB;
-
-    if (property_exists($relationship, 'component') and empty($relationship->component)) {
-        // prevent NULLs
-        $relationship->component = '';
-    }
-
-    $sql = "UPDATE {relationship} r
-              JOIN {relationship_groups} rg ON (rg.relationshipid = r.id)
-              JOIN {relationship_members} rm ON (rm.relationshipgroupid = rg.id)
-               SET rm.roleid = IF(rm.roletype = 1, r.roleid1, r.roleid2)
-             WHERE r.id = :relationshipid";
-    $DB->execute($sql, array('relationshipid'=>$relationship->id));
-}
-
 /**
  * Delete relationship.
  * @param  stdClass $relationship
@@ -420,6 +404,56 @@ function relationship_get_courses($relationshipid) {
     return $DB->get_records_sql($sql, array('relationshipid'=>$relationshipid));
 }
 
+function uniformly_distribute_members($relationshipid=NULL) {
+    global $DB;
+
+    $params = array('uniformdistribution'=>1,
+                    'disableuniformdistribution'=>0);
+    if(!empty($relationshipid)) {
+        $params['id'] = $relationshipid;
+    }
+    $relationships = $DB->get_records('relationship', $params);
+    foreach($relationships AS $rl) {
+        $sql = "SELECT cm.userid
+                  FROM relationship rl
+                  JOIN cohort ch ON (ch.id = rl.cohortid2)
+                  JOIN cohort_members cm ON (cm.cohortid = ch.id)
+             LEFT JOIN (SELECT rm.userid
+                          FROM relationship rlj
+                          JOIN relationship_groups rg ON (rg.relationshipid = rlj.id)
+                          JOIN relationship_members rm ON (rm.relationshipgroupid = rg.id AND rm.roletype = 2)
+                         WHERE rlj.id = :jrelationshipid) rmj
+                    ON (rmj.userid = cm.userid)
+                 WHERE rl.id = :relationshipid
+                   AND rmj.userid IS NULL";
+        $users = $DB->get_records_sql($sql, array('relationshipid'=>$rl->id, 'jrelationshipid'=>$rl->id));
+        if(!empty($users)) {
+            $sql = "SELECT rg.id, count(DISTINCT rm.userid) as count
+                      FROM relationship rl
+                      JOIN relationship_groups rg ON (rg.relationshipid = rl.id AND rg.disableuniformdistribution = 0)
+                 LEFT JOIN relationship_members rm ON (rm.relationshipgroupid = rg.id AND rm.roletype = 2)
+                     WHERE rl.id = :relationshipid
+                  GROUP BY rg.id";
+            $groups = $DB->get_records_sql($sql, array('relationshipid'=>$rl->id));
+            if(!empty($groups)) {
+                foreach($users AS $userid=>$us) {
+                    $min = 99999999;
+                    $gmin = 0;
+                    foreach($groups AS $grpid=>$grp) {
+                        if($grp->count < $min) {
+                            $min = $grp->count;
+                            $gmin = $grpid;
+                        }
+                    }
+                    relationshipgroup_add_member($gmin, $userid, $rl->roleid2);
+                    $groups[$gmin]->count++;
+                }
+            }
+        }
+
+    }
+}
+
 /**
  * relationship assignment candidates
  */
@@ -583,3 +617,38 @@ class relationship_existing_selector extends user_selector_base {
     }
 }
 
+/**
+ * Event handler for relationship local plugin.
+ *
+ * We try to keep everything in sync via listening to events,
+ * it may fail sometimes, so we always do a full sync in cron too.
+ */
+class local_relationship_handler {
+
+    /**
+     * Event processor - cohort member added.
+     * @param \core\event\cohort_member_added $event
+     * @return bool
+     */
+    public static function member_added(\core\event\cohort_member_added $event) {
+        global $DB;
+
+        if($rels = $DB->get_records('relationship', array('uniformdistribution'=>1, 'cohortid2'=>$event->objectid))) {
+            foreach($rels AS $r) {
+                uniformly_distribute_members($r->id);
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Event processor - cohort member removed.
+     * @param \core\event\cohort_member_removed $event
+     * @return bool
+     */
+    public static function member_removed(\core\event\cohort_member_removed $event) {
+        global $DB;
+
+        return true;
+    }
+}
