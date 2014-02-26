@@ -49,7 +49,6 @@ $string['cohortid2_help'] = 'Only members from this cohort may have role 2 assig
    Each member of this cohort is assigned to only one group.';
 $string['tochangegroups'] = 'To change groups from relationship \'{$a}\' it\'s necessary first disable the uniform distribution of members.
    Later you will have to re-enable it manually.<BR><BR>Would you like to disable the uniform distribution for relationship \'{$a}\'?';
-
 $string['addgroup'] = 'Add new group';
 $string['addgroups'] = 'Add groups';
 $string['addgroupstitle'] = 'Add groups on relationship \'{$a}\'';
@@ -106,3 +105,15 @@ $string['unknownrelationship'] = 'Unknown relationship ({$a})!';
 $string['useradded'] = 'User added to relationship "{$a}"';
 $string['search'] = 'Search';
 $string['searchrelationship'] = 'Search relationship';
+$string['tag'] = 'Tag';
+$string['tags'] = 'Tags';
+$string['addtag'] = 'Add tag';
+$string['relationshiptags'] = 'Tags list of relationship \'{$a}\'';
+$string['edittagof'] = 'Edit tags of \'{$a}\'';
+$string['deltagof'] = 'Delete tag of \'{$a}\''; 
+$string['delconfirmtag'] = 'Do you really want to delete tag \'{$a}\'?';
+$string['tagname'] = 'Tag name:';
+$string['no_delete_tag'] = 'You don\'t have permition to remove tags from other sources.';
+$string['tag_already_exists'] = 'This tag already exists. Please use another tag\'s name.';
+$string['group_already_exists'] = 'This group already exists. Please use another group\'s name.';
+$string['relationship_already_exists'] = 'This relationship already exists. Please use another relationship\'s name.';

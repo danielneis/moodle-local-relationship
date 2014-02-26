@@ -10,9 +10,12 @@ function local_relationship_extends_settings_navigation(navigation_node $navigat
     if (is_a($PAGE->context, 'context_coursecat') && has_capability('local/relationship:manage' ,$PAGE->context)) {
         $category_node = $navigation->get('categorysettings');
         if ($category_node) {
-            $node = $category_node->add(get_string('pluginname', 'local_relationship'), null, navigation_node::TYPE_CONTAINER);
-            $node->add(get_string('relationship:manage', 'local_relationship'),
-                       new moodle_url('/local/relationship/index.php', array('contextid' => $PAGE->context->id)));
+            $category_node->add(get_string('pluginname', 'local_relationship'),
+                                new moodle_url('/local/relationship/index.php', array('contextid' => $PAGE->context->id)),
+                                navigation_node::TYPE_SETTING,
+                                null,
+                                null,
+                                new pix_icon('relationship', '', 'local_relationship'));
         }
     }
 }

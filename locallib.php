@@ -130,6 +130,9 @@ function relationship_delete_relationship($relationship) {
         $DB->delete_records('relationship_members', array('relationshipgroupid'=>$g->id));
         $DB->delete_records('relationship_groups', array('id'=>$g->id));
     }
+
+    $DB->delete_records('relationship_tags', array('relationshipid'=>$relationship->id));
+
     $DB->delete_records('relationship', array('id'=>$relationship->id));
 
     $event = \local_relationship\event\relationship_deleted::create(array(
@@ -146,6 +149,7 @@ function relationship_add_group($relationshipgroup) {
     if (!isset($relationshipgroup->name)) {
         throw new coding_exception('Missing relationshipgroup name in relationshipgroup_add_group().');
     }
+    $relationshipgroup->name = trim($relationshipgroup->name);
     if (!isset($relationshipgroup->timecreated)) {
         $relationshipgroup->timecreated = time();
     }
@@ -170,6 +174,9 @@ function relationship_update_group($relationshipgroup) {
     global $DB;
 
     $relationshipgroup->timemodified = time();
+    if (isset($relationshipgroup->name)) {
+        $relationshipgroup->name = trim($relationshipgroup->name);
+    }
     $DB->update_record('relationship_groups', $relationshipgroup);
     $relationship = $DB->get_record('relationship', array('id' => $relationshipgroup->relationshipid), '*', MUST_EXIST);
 
@@ -195,6 +202,34 @@ function relationship_delete_group($relationshipgroup) {
     $event->add_record_snapshot('relationship_groups', $relationshipgroup);
     $event->trigger();
 }
+
+function relationship_add_tag($relationshiptag){
+    global $DB;
+   
+    if (!isset($relationshiptag->name)) {
+          throw new coding_exception('Missing relationshiptag name in relationship_add_tag().');
+    }
+    if (!isset($relationshiptag->timecreated)) {
+          $relationshiptag->timecreated = time();
+    }
+                
+    $relationshiptag->id = $DB->insert_record('relationship_tags', $relationshiptag);
+    $relationship = $DB->get_record('relationship', array('id' => $relationshiptag->relationshipid), '*', MUST_EXIST);
+                
+}
+
+function relationship_update_tag($relationshiptag){
+   global $DB;
+
+   $DB->update_record('relationship_tags',$relationshiptag);
+}
+
+function relationship_delete_tag($relationshiptag){
+    global $DB;
+
+    $DB->delete_records('relationship_tags', array('id'=>$relationshiptag->id));
+}
+
 
 /**
  * Somehow deal with relationships when deleting course category,

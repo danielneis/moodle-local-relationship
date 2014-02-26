@@ -92,6 +92,7 @@ foreach($relationshipgroups as $relationshipgroup) {
     $line = array();
 
     $line[] = format_string($relationshipgroup->name);
+    $line[] = format_string($relationship->component);
     $line[] = $relationshipgroup->size;
 
     if($relationship->uniformdistribution == 1) {
@@ -123,9 +124,9 @@ foreach($relationshipgroups as $relationshipgroup) {
     $data[] = $line;
 }
 $table = new html_table();
-$table->head  = array(get_string('name', 'local_relationship'),
+$table->head  = array(get_string('name', 'local_relationship'),get_string('component', 'local_relationship'),
                       get_string('memberscount', 'local_relationship'));
-$table->colclasses = array('leftalign name', 'leftalign size');
+$table->colclasses = array('leftalign name', 'leftalign component', 'leftalign size');
 if($relationship->uniformdistribution == 1) {
     $table->head[] = get_string('uniformdistribute', 'local_relationship');
     $table->colclasses[] = 'centeralign uniformdistribute';

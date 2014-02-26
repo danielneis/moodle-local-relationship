@@ -71,5 +71,4 @@ class relationship_created extends \core\event\base {
     public function get_url() {
         return new \moodle_url('/local/relationship/index.php', array('contextid' => $this->contextid));
     }
-
 }

@@ -64,20 +64,24 @@ if ($category) {
     admin_externalpage_setup('relationships', '', null, '', array('pagelayout'=>'report'));
 }
 
+/* Analisa as propriedades da página, para depois começar a executar os comandos,
+   carrega-se tudo que é necessário.
+   */
+
 echo $OUTPUT->header();
 
 $relationships = relationship_get_relationships($context->id, $page, 25, $searchquery);
 
 $count = '';
 if ($relationships['allrelationships'] > 0) {
-    if ($searchquery === '') {
+    if ($searchquery === '') { //operador identico
         $count = ' ('.$relationships['allrelationships'].')';
     } else {
         $count = ' ('.$relationships['totalrelationships'].'/'.$relationships['allrelationships'].')';
     }
 }
 
-echo $OUTPUT->heading(get_string('relationshipsin', 'local_relationship', $context->get_context_name()).$count);
+echo $OUTPUT->heading(get_string('relationshipsin', 'local_relationship', $context->get_context_name()).$count); // cabeçalho, "CATEGORY: MISCELANIOUS
 
 // Add search form.
 $search  = html_writer::start_tag('form', array('id'=>'searchrelationshipquery', 'method'=>'get'));
@@ -108,10 +112,10 @@ foreach($relationships['relationships'] as $relationship) {
 
     $line[] = format_string($relationship->name);
 
-    $sql = "SELECT count(DISTINCT rm.userid)
+    $sql = "SELECT count(DISTINCT rm.userid)  
               FROM relationship_groups rg
               JOIN relationship_members rm ON (rm.relationshipgroupid = rg.id)
-             WHERE rg.relationshipid = :relationshipid";
+             WHERE rg.relationshipid = :relationshipid"; // realizando consulta no banco de dados, fazendo select
     $line[] = $DB->count_records_sql($sql, array('relationshipid'=>$relationship->id));
 
     if($cohort1 = $DB->get_record('cohort', array('id'=>$relationship->cohortid1))) {
@@ -164,6 +168,8 @@ foreach($relationships['relationships'] as $relationship) {
     }
     $buttons[] = html_writer::link(new moodle_url('/local/relationship/groups.php', array('relationshipid'=>$relationship->id)),
         html_writer::empty_tag('img', array('src'=>$OUTPUT->pix_url('t/groups'), 'alt'=>get_string('groups'), 'title'=>get_string('groups'), 'class'=>'iconsmall')));
+    $buttons[] = html_writer::link(new moodle_url('/local/relationship/tags.php', array('relationshipid'=>$relationship->id)),
+        html_writer::empty_tag('img', array('src'=>$OUTPUT->pix_url('i/flagged'), 'alt'=>get_string('tags', 'local_relationship'), 'title'=>get_string('tags', 'local_relationship'), 'class'=>'iconsmall')));
     $buttons[] = html_writer::link(new moodle_url('/local/relationship/view.php', array('relationshipid'=>$relationship->id)),
         html_writer::empty_tag('img', array('src'=>$OUTPUT->pix_url('i/report'), 'alt'=>get_string('viewreport', 'local_relationship'), 'title'=>get_string('viewreport', 'local_relationship'), 'class'=>'iconsmall')));
     $line[] = implode(' ', $buttons);

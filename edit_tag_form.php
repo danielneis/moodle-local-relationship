@@ -26,37 +26,37 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot . '/lib/formslib.php');
 
-class relationshipgroup_edit_form extends moodleform {
+class relationshiptag_edit_form extends moodleform {
 
     /**
-     * Define the relationshipgroup edit form
+     * Define the relationshiptag edit form
      */
     public function definition() {
 
         $mform = $this->_form;
         $editoroptions = $this->_customdata['editoroptions'];
-        $relationshipgroup = $this->_customdata['data'];
-
-        $mform->addElement('text', 'name', get_string('groupname', 'local_relationship'), 'maxlength="254" size="50"');
+        $relationshiptag = $this->_customdata['data'];
+        
+        $mform->addElement('text', 'name', get_string('tagname', 'local_relationship'), 'maxlength="254" size="50"');
         $mform->addRule('name', get_string('required'), 'required', null, 'client');
-        $mform->setType('name', PARAM_NOTAGS);
-
-        $mform->addElement('hidden', 'id');
+        $mform->setType('name', PARAM_TAG);
+        
+        $mform->addElement('hidden', 'id', $relationshiptag->id);
         $mform->setType('id', PARAM_INT);
-        $mform->addElement('hidden', 'relationshipid');
+        $mform->addElement('hidden', 'relationshipid', $relationshiptag->relationshipid);
         $mform->setType('relationshipid', PARAM_INT);
-
+        
         $this->add_action_buttons();
 
-        $this->set_data($relationshipgroup);
+        $this->set_data($relationshiptag);
     }
 
     public function validation($data, $files) {
         global $DB;
 
         $errors = parent::validation($data, $files);
-        if($DB->record_exists('relationship_groups', array('relationshipid'=>$data['relationshipid'], 'name'=>$data['name']))){
-               $errors['name'] = get_string('group_already_exists', 'local_relationship');
+        if($DB->record_exists('relationship_tags', array('relationshipid'=>$data['relationshipid'], 'name'=>$data['name']))) {
+            $errors['name'] = get_string('tag_already_exists', 'local_relationship');
         }
         return $errors;
     }
