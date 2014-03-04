@@ -31,7 +31,7 @@ $relationshipid = optional_param('relationshipid', 0, PARAM_INT);
 $contextid = optional_param('contextid', 0, PARAM_INT);
 $delete    = optional_param('delete', 0, PARAM_BOOL);
 $confirm   = optional_param('confirm', 0, PARAM_BOOL);
-$disable_uniformdistribution = optional_param('disable_uniformdistribution', -1, PARAM_INT);
+$uniformdistribution = optional_param('uniformdistribution', -1, PARAM_INT);
 
 require_login();
 
@@ -60,9 +60,11 @@ if (!empty($relationship->component)) {
     redirect($returnurl);
 }
 
-if ($disable_uniformdistribution != -1 and $relationship->id) {
-    $DB->set_field('relationship', 'disableuniformdistribution', $disable_uniformdistribution == 1 ? 1 : 0,
-                        array('id'=>$relationship->id));
+if ($relationship->id && $uniformdistribution != -1) {
+    $DB->set_field('relationship', 'uniformdistribution', $uniformdistribution, array('id'=>$relationship->id));
+    if($uniformdistribution) {
+        relationship_uniformly_distribute_members($relationship->id);
+    }
     redirect($returnurl);
 }
 
@@ -123,7 +125,7 @@ if ($editform->is_cancelled()) {
     if ($data->id) {
         relationship_update_relationship($data);
     } else {
-        $data->disableuniformdistribution = 1;
+        $data->uniformdistribution = 0;
         relationship_add_relationship($data);
     }
 

@@ -49,6 +49,7 @@ $string['cohortid2_help'] = 'Only members from this cohort may have role 2 assig
    Each member of this cohort is assigned to only one group.';
 $string['tochangegroups'] = 'To change groups from relationship \'{$a}\' it\'s necessary first disable the uniform distribution of members.
    Later you will have to re-enable it manually.<BR><BR>Would you like to disable the uniform distribution for relationship \'{$a}\'?';
+$string['groups_unchangeable'] = 'Groups cannot be changed because uniform distribution is enable for this relationship';
 $string['addgroup'] = 'Add new group';
 $string['addgroups'] = 'Add groups';
 $string['addgroupstitle'] = 'Add groups on relationship \'{$a}\'';
@@ -59,6 +60,7 @@ $string['courses'] = 'Courses';
 $string['assignto'] = 'Relationship group \'{$a}\' members';
 $string['backtorelationship'] = 'Back to the relationship';
 $string['backtorelationships'] = 'Back to relationships';
+$string['backtogroupsrelationship'] = 'Back to groups relationship';
 $string['bulkadd'] = 'Add to relationship';
 $string['bulknorelationship'] = 'No available relationships found';
 $string['relationshipname'] = 'Relationship \'{$a}\'';
@@ -117,3 +119,4 @@ $string['no_delete_tag'] = 'You don\'t have permition to remove tags from other 
 $string['tag_already_exists'] = 'This tag already exists. Please use another tag\'s name.';
 $string['group_already_exists'] = 'This group already exists. Please use another group\'s name.';
 $string['relationship_already_exists'] = 'This relationship already exists. Please use another relationship\'s name.';
+$string['see_group_members'] = 'Visualiza membros do grupo';

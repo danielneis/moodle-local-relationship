@@ -31,7 +31,7 @@ $relationshipgroupid   = optional_param('relationshipgroupid', 0, PARAM_INT);
 $relationshipid = optional_param('relationshipid', 0, PARAM_INT);
 $delete    = optional_param('delete', 0, PARAM_BOOL);
 $confirm   = optional_param('confirm', 0, PARAM_BOOL);
-$disable_uniformdistribution = optional_param('disable_uniformdistribution', -1, PARAM_INT);
+$uniformdistribution = optional_param('uniformdistribution', -1, PARAM_INT);
 
 require_login();
 
@@ -61,9 +61,8 @@ if (!empty($relationship->component)) {
     redirect($returnurl);
 }
 
-if ($disable_uniformdistribution != -1 and $relationshipgroup->id) {
-    $DB->set_field('relationship_groups', 'disableuniformdistribution', $disable_uniformdistribution == 1 ? 1 : 0,
-                        array('id'=>$relationshipgroup->id));
+if ($relationshipgroup->id && $uniformdistribution != -1) {
+    $DB->set_field('relationship_groups', 'uniformdistribution', $uniformdistribution, array('id'=>$relationshipgroup->id));
     redirect($returnurl);
 }
 

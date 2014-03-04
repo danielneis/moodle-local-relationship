@@ -205,17 +205,17 @@ function relationship_delete_group($relationshipgroup) {
 
 function relationship_add_tag($relationshiptag){
     global $DB;
-   
+
     if (!isset($relationshiptag->name)) {
           throw new coding_exception('Missing relationshiptag name in relationship_add_tag().');
     }
     if (!isset($relationshiptag->timecreated)) {
           $relationshiptag->timecreated = time();
     }
-                
+
     $relationshiptag->id = $DB->insert_record('relationship_tags', $relationshiptag);
     $relationship = $DB->get_record('relationship', array('id' => $relationshiptag->relationshipid), '*', MUST_EXIST);
-                
+
 }
 
 function relationship_update_tag($relationshiptag){
@@ -288,7 +288,6 @@ function relationshipgroup_add_member($relationshipgroupid, $userid, $roleid) {
         'relateduserid' => $userid,
         'other' => $roleid,
     ));
-    $event->add_record_snapshot('relationship', $relationship);
     $event->add_record_snapshot('relationship_groups', $relationshipgroup);
     $event->trigger();
 }
@@ -299,10 +298,10 @@ function relationshipgroup_add_member($relationshipgroupid, $userid, $roleid) {
  * @param  int $userid
  * @return void
  */
-function relationshipgroup_remove_member($relationshipgroupid, $userid) {
+function relationshipgroup_remove_member($relationshipgroupid, $userid, $roleid) {
     global $DB;
 
-    $DB->delete_records('relationship_members', array('relationshipgroupid'=>$relationshipgroupid, 'userid'=>$userid));
+    $DB->delete_records('relationship_members', array('relationshipgroupid'=>$relationshipgroupid, 'userid'=>$userid, 'roleid'=>$roleid));
 
     $relationshipgroup = $DB->get_record('relationship_groups', array('id' => $relationshipgroupid), '*', MUST_EXIST);
     $relationship = $DB->get_record('relationship', array('id' => $relationshipgroup->relationshipid), '*', MUST_EXIST);
@@ -311,8 +310,8 @@ function relationshipgroup_remove_member($relationshipgroupid, $userid) {
         'context' => context::instance_by_id($relationship->contextid),
         'objectid' => $relationshipgroupid,
         'relateduserid' => $userid,
+        'other' => $roleid,
     ));
-    $event->add_record_snapshot('relationship', $relationship);
     $event->add_record_snapshot('relationship_groups', $relationshipgroup);
     $event->trigger();
 }
@@ -439,11 +438,39 @@ function relationship_get_courses($relationshipid) {
     return $DB->get_records_sql($sql, array('relationshipid'=>$relationshipid));
 }
 
-function uniformly_distribute_members($relationshipid=NULL) {
+function relationship_uniformly_distribute_users($relationship, $userids=array()) {
     global $DB;
 
-    $params = array('uniformdistribution'=>1,
-                    'disableuniformdistribution'=>0);
+    if(empty($userids)) {
+        return;
+    }
+    $sql = "SELECT rg.id, count(DISTINCT rm.userid) as count
+              FROM relationship rl
+              JOIN relationship_groups rg ON (rg.relationshipid = rl.id AND rg.uniformdistribution = 1)
+         LEFT JOIN relationship_members rm ON (rm.relationshipgroupid = rg.id AND rm.roletype = 2)
+             WHERE rl.id = :relationshipid
+          GROUP BY rg.id";
+    $groups = $DB->get_records_sql($sql, array('relationshipid'=>$relationship->id));
+    if(!empty($groups)) {
+        foreach($userids AS $userid) {
+            $min = 99999999;
+            $gmin = 0;
+            foreach($groups AS $grpid=>$grp) {
+                if($grp->count < $min) {
+                    $min = $grp->count;
+                    $gmin = $grpid;
+                }
+            }
+            relationshipgroup_add_member($gmin, $userid, $relationship->roleid2);
+            $groups[$gmin]->count++;
+        }
+    }
+}
+
+function relationship_uniformly_distribute_members($relationshipid=NULL) {
+    global $DB;
+
+    $params = array('uniformdistribution'=>1);
     if(!empty($relationshipid)) {
         $params['id'] = $relationshipid;
     }
@@ -462,30 +489,7 @@ function uniformly_distribute_members($relationshipid=NULL) {
                  WHERE rl.id = :relationshipid
                    AND rmj.userid IS NULL";
         $users = $DB->get_records_sql($sql, array('relationshipid'=>$rl->id, 'jrelationshipid'=>$rl->id));
-        if(!empty($users)) {
-            $sql = "SELECT rg.id, count(DISTINCT rm.userid) as count
-                      FROM relationship rl
-                      JOIN relationship_groups rg ON (rg.relationshipid = rl.id AND rg.disableuniformdistribution = 0)
-                 LEFT JOIN relationship_members rm ON (rm.relationshipgroupid = rg.id AND rm.roletype = 2)
-                     WHERE rl.id = :relationshipid
-                  GROUP BY rg.id";
-            $groups = $DB->get_records_sql($sql, array('relationshipid'=>$rl->id));
-            if(!empty($groups)) {
-                foreach($users AS $userid=>$us) {
-                    $min = 99999999;
-                    $gmin = 0;
-                    foreach($groups AS $grpid=>$grp) {
-                        if($grp->count < $min) {
-                            $min = $grp->count;
-                            $gmin = $grpid;
-                        }
-                    }
-                    relationshipgroup_add_member($gmin, $userid, $rl->roleid2);
-                    $groups[$gmin]->count++;
-                }
-            }
-        }
-
+        relationship_uniformly_distribute_users($rl, array_keys($users));
     }
 }
 
@@ -609,7 +613,7 @@ class relationship_existing_selector extends user_selector_base {
         $params['relationshipgroupid'] = $this->relationshipgroup->id;
         $relationship = $DB->get_record('relationship', array('id' => $this->relationshipgroup->relationshipid), '*', MUST_EXIST);
 
-        $fields      = 'SELECT ' . $this->required_fields_sql('u');
+        $fields      = 'SELECT ' . $this->required_fields_sql('u') . ', cm.roleid, cm.roletype';
         $countfields = 'SELECT COUNT(1)';
 
         $sql = " FROM {user} u
@@ -669,8 +673,8 @@ class local_relationship_handler {
         global $DB;
 
         if($rels = $DB->get_records('relationship', array('uniformdistribution'=>1, 'cohortid2'=>$event->objectid))) {
-            foreach($rels AS $r) {
-                uniformly_distribute_members($r->id);
+            foreach($rels AS $rel) {
+                relationship_uniformly_distribute_users($rel, array($event->relateduserid));
             }
         }
         return true;
@@ -684,6 +688,28 @@ class local_relationship_handler {
     public static function member_removed(\core\event\cohort_member_removed $event) {
         global $DB;
 
+        $cohortid = $event->objectid;
+        $userid = $event->relateduserid;
+        $sql = "SELECT rg.id as relationshipgroupid, rg.uniformdistribution, rm.roleid, rm.userid
+                  FROM relationship rl
+                  JOIN relationship_groups rg ON (rg.relationshipid = rl.id)
+                  JOIN relationship_members rm ON (rm.relationshipgroupid = rg.id AND rm.roleid = rl.roleid1)
+                 WHERE rl.cohortid1 = :cohortid1
+                   AND rm.userid = :userid1
+
+                  UNION
+
+                SELECT rg.id as relationshipgroupid, rg.uniformdistribution, rm.roleid, rm.userid
+                  FROM relationship rl
+                  JOIN relationship_groups rg ON (rg.relationshipid = rl.id)
+                  JOIN relationship_members rm ON (rm.relationshipgroupid = rg.id AND rm.roleid = rl.roleid2)
+                 WHERE rl.cohortid2 = :cohortid2
+                   AND rm.userid = :userid2";
+        $rels = $DB->get_records_sql($sql, array('cohortid1'=>$cohortid, 'userid1'=>$userid,
+                                                 'cohortid2'=>$cohortid, 'userid2'=>$userid));
+        foreach($rels AS $relationshipgroupid=>$rel) {
+            relationshipgroup_remove_member($relationshipgroupid, $userid, $rel->roleid);
+        }
         return true;
     }
 }

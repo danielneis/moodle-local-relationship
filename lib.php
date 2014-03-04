@@ -22,6 +22,6 @@ function local_relationship_extends_settings_navigation(navigation_node $navigat
 
 
 function local_relationship_cron() {
-    uniformly_distribute_members();
+    relationship_uniformly_distribute_members();
     return true;
 }

@@ -89,7 +89,7 @@ if (optional_param('remove', false, PARAM_BOOL) && confirm_sesskey()) {
     $userstoremove = $existinguserselector->get_selected_users();
     if (!empty($userstoremove)) {
         foreach ($userstoremove as $removeuser) {
-            relationshipgroup_remove_member($relationshipgroup->id, $removeuser->id);
+            relationshipgroup_remove_member($relationshipgroup->id, $removeuser->id, $removeuser->roleid);
         }
         $potentialuserselector->invalidate_selected_users();
         $existinguserselector->invalidate_selected_users();
@@ -122,7 +122,7 @@ if (optional_param('remove', false, PARAM_BOOL) && confirm_sesskey()) {
       </td>
     </tr>
     <tr><td colspan="3" id='backcell'>
-      <input type="submit" name="cancel" value="<?php p(get_string('backtorelationship', 'local_relationship')); ?>" />
+      <input type="submit" name="cancel" value="<?php p(get_string('backtogroupsrelationship', 'local_relationship')); ?>" />
     </td></tr>
   </table>
 </div></form>

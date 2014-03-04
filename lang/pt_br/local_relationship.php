@@ -48,6 +48,7 @@ $string['cohortid2_help'] = 'Apenas membros desde coorte estão associados ao pa
    Cada membro deste coorte está associado a apenas um grupo.';
 $string['tochangegroups'] = 'Para mudar grupos de relacionamentos \'{$a}\' é necessário, primeiro, desabilitar a destribuição uniforme dos membros.
    Após você terá que reabilitar manualmente.<BR><BR>Você gostaria de desabilitar a destribuição uniforme para os relacionamento \'{$a}\'?';
+$string['groups_unchangeable'] = 'Os grupos não podem ser alterados porque a distribuição uniforme está ativa para este relacionamento';
 $string['addgroup'] = 'Adicionar novo grupo';
 $string['addgroups'] = 'Adicionar groupo';
 $string['addgroupstitle'] = 'Adicionar grupo no relacionamento \'{$a}\'';

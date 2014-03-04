@@ -112,7 +112,7 @@ foreach($relationships['relationships'] as $relationship) {
 
     $line[] = format_string($relationship->name);
 
-    $sql = "SELECT count(DISTINCT rm.userid)  
+    $sql = "SELECT count(DISTINCT rm.userid)
               FROM relationship_groups rg
               JOIN relationship_members rm ON (rm.relationshipgroupid = rg.id)
              WHERE rg.relationshipid = :relationshipid"; // realizando consulta no banco de dados, fazendo select
@@ -142,18 +142,13 @@ foreach($relationships['relationships'] as $relationship) {
 
     $line[] = empty($relationship->component) ? get_string('nocomponent', 'local_relationship') : get_string('pluginname', $relationship->component);
 
-    $str_ud = $relationship->uniformdistribution == 1 ?  get_string('yes') : get_string('no');
-    if($relationship->uniformdistribution == 1) {
-        $str_ud .= ' -> ';
-        $str_ud .= $relationship->disableuniformdistribution == 1 ?  get_string('disabled', 'local_relationship') : get_string('enabled', 'local_relationship');
-        if($relationship->disableuniformdistribution == 1) {
-            $link = html_writer::link(new moodle_url('/local/relationship/edit.php', array('relationshipid'=>$relationship->id, 'disable_uniformdistribution'=>0)), get_string('enable'));
-        } else {
-            $link = html_writer::link(new moodle_url('/local/relationship/edit.php', array('relationshipid'=>$relationship->id, 'disable_uniformdistribution'=>1)), get_string('disable'));
-        }
-        $str_ud .= " ({$link})";
+    if($relationship->uniformdistribution) {
+        $link = html_writer::link(new moodle_url('/local/relationship/edit.php', array('relationshipid'=>$relationship->id, 'uniformdistribution'=>0)), get_string('disable'));
+        $line[] = get_string('yes'). " ({$link})";
+    } else {
+        $link = html_writer::link(new moodle_url('/local/relationship/edit.php', array('relationshipid'=>$relationship->id, 'uniformdistribution'=>1)), get_string('enable'));
+        $line[] = get_string('no'). " ({$link})";
     }
-    $line[] = $str_ud;
 
     $buttons = array();
     if (empty($relationship->component)) {
@@ -170,8 +165,6 @@ foreach($relationships['relationships'] as $relationship) {
         html_writer::empty_tag('img', array('src'=>$OUTPUT->pix_url('t/groups'), 'alt'=>get_string('groups'), 'title'=>get_string('groups'), 'class'=>'iconsmall')));
     $buttons[] = html_writer::link(new moodle_url('/local/relationship/tags.php', array('relationshipid'=>$relationship->id)),
         html_writer::empty_tag('img', array('src'=>$OUTPUT->pix_url('i/flagged'), 'alt'=>get_string('tags', 'local_relationship'), 'title'=>get_string('tags', 'local_relationship'), 'class'=>'iconsmall')));
-    $buttons[] = html_writer::link(new moodle_url('/local/relationship/view.php', array('relationshipid'=>$relationship->id)),
-        html_writer::empty_tag('img', array('src'=>$OUTPUT->pix_url('i/report'), 'alt'=>get_string('viewreport', 'local_relationship'), 'title'=>get_string('viewreport', 'local_relationship'), 'class'=>'iconsmall')));
     $line[] = implode(' ', $buttons);
 
     $data[] = $line;
