@@ -119,4 +119,3 @@ $string['no_delete_tag'] = 'You don\'t have permition to remove tags from other 
 $string['tag_already_exists'] = 'This tag already exists. Please use another tag\'s name.';
 $string['group_already_exists'] = 'This group already exists. Please use another group\'s name.';
 $string['relationship_already_exists'] = 'This relationship already exists. Please use another relationship\'s name.';
-$string['see_group_members'] = 'Visualiza membros do grupo';

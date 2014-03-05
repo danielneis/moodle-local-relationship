@@ -81,8 +81,10 @@ foreach($relationshipgroups as $relationshipgroup) {
     $buttons = array();
     if($relationship->uniformdistribution) {
         $line[] = $relationshipgroup->uniformdistribution ? get_string('yes') : get_string('no');
-        $buttons[] = html_writer::link(new moodle_url('/local/relationship/see_group_members.php', array('relationshipgroupid'=>$relationshipgroup->id)),
-                html_writer::empty_tag('img', array('src'=>$OUTPUT->pix_url('t/assignroles'), 'alt'=>get_string('see_group_members', 'local_relationship'), 'title'=>get_string('see_group_members', 'local_relationship'), 'class'=>'iconsmall')));
+        if (empty($relationship->component) && ($manager or $canassign)) {
+            $buttons[] = html_writer::link(new moodle_url('/local/relationship/assign.php', array('relationshipgroupid'=>$relationshipgroup->id)),
+                    html_writer::empty_tag('img', array('src'=>$OUTPUT->pix_url('t/assignroles'), 'alt'=>get_string('assign', 'local_relationship'), 'title'=>get_string('assign', 'local_relationship'), 'class'=>'iconsmall')));
+        }
     } else {
         if($relationshipgroup->uniformdistribution) {
             $link = html_writer::link(new moodle_url('/local/relationship/edit_group.php', array('relationshipgroupid'=>$relationshipgroup->id, 'uniformdistribution'=>0)), get_string('disable'));
