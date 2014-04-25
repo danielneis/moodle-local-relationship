@@ -1,121 +1,103 @@
 <?php
 
-// This file is part of Moodle - http://moodle.org/
-//
-// Moodle is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// Moodle is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+$string['pluginname'] = 'Relacionamentos';
+$string['allocated'] = ' (já alocado em outro grupo)';
+$string['notallocated'] = ' (ainda não alocado)';
+$string['viewreport'] = 'Vizualizar';
 
-/**
- * Strings for component 'relationship'
- *
- * @package    local_relationship
- * @subpackage relationship
- * @copyright  2010 Petr Skoda (info@skodak.org)
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
+$string['relationshipsin'] = 'Relacionamentos: {$a}';
 
-$string['pluginname'] = 'Relationship';
-$string['role1'] = 'Role 1';
-$string['role2'] = 'Role 2';
-$string['cohort1'] = 'Cohort 1';
-$string['cohort2'] = 'Cohort 2';
-$string['allocated'] = ' (already assigned in other group)';
-$string['notallocated'] = ' (not yet assigned)';
-$string['viewreport'] = 'View';
-$string['uniformdistribute'] = 'Uniformly distribute';
-$string['uniformdistribution'] = 'Uniformly distribute cohort 2 members';
-$string['enable_uniformdistribution'] = 'Enable uniform distribution';
-$string['disable_uniformdistribution'] = 'Disable uniform distribution';
-$string['enabled'] = 'enabled';
-$string['disabled'] = 'disabled';
+$string['enabled'] = 'Ativado';
+$string['saved'] = 'Dados foram salvos';
 
-$string['cohortid1'] = 'Cohort 1';
-$string['cohortid1_help'] = 'Only members from this cohort may have role 1 assigned to.
-   These members are people qualified to teach or provide tutoring to students.
-   In general there is only one person with this role in each group.';
-$string['cohortid2'] = 'Cohort 2';
-$string['cohortid2_help'] = 'Only members from this cohort may have role 2 assigned to.
-   These members (students for instance) are people who receive attention from cohort1 members. 
-   Each member of this cohort is assigned to only one group.';
-$string['tochangegroups'] = 'To change groups from relationship \'{$a}\' it\'s necessary first disable the uniform distribution of members.
-   Later you will have to re-enable it manually.<BR><BR>Would you like to disable the uniform distribution for relationship \'{$a}\'?';
-$string['groups_unchangeable'] = 'Groups cannot be changed because uniform distribution is enable for this relationship';
-$string['addgroup'] = 'Add new group';
-$string['addgroups'] = 'Add groups';
-$string['addgroupstitle'] = 'Add groups on relationship \'{$a}\'';
-$string['addrelationship'] = 'Add new relationship';
-$string['anyrelationship'] = 'Any';
-$string['assign'] = 'Assign';
-$string['courses'] = 'Courses';
-$string['assignto'] = 'Relationship group \'{$a}\' members';
-$string['backtorelationship'] = 'Back to the relationship';
-$string['backtorelationships'] = 'Back to relationships';
-$string['backtogroupsrelationship'] = 'Back to groups relationship';
-$string['bulkadd'] = 'Add to relationship';
-$string['bulknorelationship'] = 'No available relationships found';
-$string['relationshipname'] = 'Relationship \'{$a}\'';
-$string['relationship'] = 'relationship';
-$string['relationships'] = 'relationships';
-$string['relationshipgroups'] = 'Group list of relationship \'{$a}\'';
-$string['relationshipcourses'] = 'Course list for this relationship';
-$string['relationshipsin'] = '{$a}: available relationships';
-$string['relationship:assign'] = 'Assign relationship group members';
-$string['relationship:manage'] = 'Manage relationships';
-$string['relationship:view'] = 'Use relationships and view members';
-$string['component'] = 'Source';
-$string['currentusers'] = 'Current users';
-$string['currentusersmatching'] = 'Current users matching';
-$string['delrelationship'] = 'Delete relationship';
-$string['delgroupof'] = 'Delete relationship group of \'{$a}\'';
-$string['delconfirm'] = 'Do you really want to delete relationship \'{$a}\'?';
-$string['delconfirmgroup'] = 'Do you really want to delete group \'{$a}\'?';
-$string['description'] = 'Description';
-$string['duplicateidnumber'] = 'Relationship with the same ID number already exists';
-$string['editgroupof'] = 'Edit relationship group of \'{$a}\'';
-$string['editrelationship'] = 'Edit relationship';
-$string['event_relationship_created'] = 'Relationship created';
-$string['event_relationship_deleted'] = 'Relationship deleted';
-$string['event_relationship_updated'] = 'Relationship updated';
-$string['event_relationshipgroup_created'] = 'Relationship group created';
-$string['event_relationshipgroup_deleted'] = 'Relationship group deleted';
-$string['event_relationshipgroup_updated'] = 'Relationship group updated';
-$string['event_relationshipgroup_member_added'] = 'User added to a relationshipgroup';
-$string['event_relationshipgroup_member_removed'] = 'User removed from a relationshipgroup';
-$string['external'] = 'External relationship';
-$string['idnumber'] = 'Relationship ID';
-$string['memberscount'] = 'Size';
-$string['name'] = 'Name';
-$string['groupname'] = 'Group name';
+$string['cohorts'] = 'Papeis e coortes';
+$string['groups'] = 'Grupos';
+
+$string['allowdupsingroups'] = 'Inscrição em vários grupos';
+$string['rolescohortsfull'] = 'Papeis e coortes para o relacionamento: \'{$a}\'';
+$string['noeditable'] = 'Este relacionamento não pode ser alterado pois ou está ativado ou é de origem externa';
+
+$string['search'] = 'Buscar';
+$string['searchrelationship'] = 'Buscar relacionamentos: ';
+
+$string['uniformdistribute'] = 'Distribuição uniforme';
+$string['uniformdistribution'] = 'Distribuição uniforme nos grupos';
+$string['enable_uniformdistribution'] = 'Abilitar distribuição uniforme';
+$string['disable_uniformdistribution'] = 'Desabilitar destribuição uniforme';
+
+$string['cantedit'] = 'Este relacionamento não pode ser manualmente alterado';
+
+$string['tochangegroups'] = 'Para mudar grupos de relacionamentos \'{$a}\' é necessário, primeiro, desabilitar a destribuição uniforme dos membros.
+   Após você terá que reabilitar manualmente.<BR><BR>Você gostaria de desabilitar a destribuição uniforme para os relacionamento \'{$a}\'?';
+$string['groups_unchangeable'] = 'Os grupos não podem ser alterados porque a distribuição uniforme está ativa para este relacionamento';
+
+$string['addgroup'] = 'Adicionar novo grupo';
+$string['editgroup'] = 'Editar grupo: \'{$a}\'';
+$string['deletegroup'] = 'Remover grupo: \'{$a}\'';
+
+$string['addrelationship'] = 'Adicionar novo relacionamento';
+$string['anyrelationship'] = 'Qualquer';
+
+$string['addcohort'] = 'Adicionar novo papel/coorte';
+$string['editcohort'] = 'Editar papel/coorte: \'{$a}\'';
+$string['deletecohort'] = 'Remover papel/coorte: \'{$a}\'';
+
+$string['assign'] = 'Atribuir';
+$string['courses'] = 'Cursos';
+$string['assignto'] = 'Membros do grupo: \'{$a}\'';
+$string['backtorelationship'] = 'Voltar para o relacionamento';
+$string['backtorelationships'] = 'Voltar para relacionamentos';
+$string['bulkadd'] = 'Adicionar relacionamento';
+$string['bulknorelationship'] = 'Nenhum relacionamento disponível encontrado';
+$string['relationship'] = 'Relacionamento';
+$string['relationships'] = 'Relacionamentos';
+$string['relationshipgroups'] = 'Lista de grupos do relacionamento \'{$a}\'';
+$string['relationshipcourses'] = 'Lista de cursos para este relacionamento';
+$string['relationship:assign'] = 'Designar membros do relacionamento';
+$string['relationship:manage'] = 'Gerenciar relacionamentos';
+$string['relationship:view'] = 'Usar relacionamentos e ver membros';
+$string['component'] = 'Fonte';
+$string['currentusers'] = 'Usuários atuais';
+$string['currentusersmatching'] = 'Usuários atuais que conferem';
+$string['deleterelationship'] = 'Remover relacionamento';
+$string['confirmdelete'] = 'Você realmente quer remover o relacionamento: \'{$a}\'?';
+$string['confirmdeletegroup'] = 'Você realmente quer remover o grupo: \'{$a}\'?';
+$string['confirmdeleletecohort'] = 'Você realmente quer remover papel/cohort: \'{$a}\'?';
+$string['description'] = 'Descrição';
+$string['duplicateidnumber'] = 'Já há um relacionamento com essa mesma ID';
+$string['editrelationship'] = 'Editar relacionamento';
+$string['event_relationship_created'] = 'Relacionamento criado';
+$string['event_relationship_deleted'] = 'Relacionamento removido';
+$string['event_relationship_updated'] = 'Relacionamento atualizado';
+$string['event_relationshipgroup_created'] = 'Relacionamento do grupo criado';
+$string['event_relationshipgroup_deleted'] = 'Relacionamento do grupo removido';
+$string['event_relationshipgroup_updated'] = 'Relacionamento do grupo atualizado';
+$string['event_relationshipgroup_member_added'] = 'Usuários adicionados em um relacionamento';
+$string['event_relationshipgroup_member_removed'] = 'Usuários removidos de um relacionamento';
+$string['external'] = 'Relacionamento externo';
+$string['idnumber'] = 'ID do relacionamento';
+$string['memberscount'] = 'Membros';
+$string['name'] = 'Nome';
+$string['groupname'] = 'Nome do Grupo';
 $string['groupname_pattern'] = 'Group name pattern';
-$string['nocomponent'] = 'Created manually';
-$string['potusers'] = 'Potential users';
-$string['potusersmatching'] = 'Potential matching users';
-$string['removeuserwarning'] = 'Removing users from a relationship may result in unenrolling of users from multiple courses which includes deleting of user settings, grades, group membership and other user information from affected courses.';
-$string['removegroupwarning'] = 'Removing group from a relationship may result in unenrolling of users from multiple courses which includes deleting of user settings, grades, group membership and other user information from affected courses.';
-$string['selectfromrelationship'] = 'Select members from relationship';
-$string['unknownrelationship'] = 'Unknown relationship ({$a})!';
-$string['useradded'] = 'User added to relationship "{$a}"';
-$string['search'] = 'Search';
-$string['searchrelationship'] = 'Search relationship';
-$string['tag'] = 'Tag';
-$string['tags'] = 'Tags';
-$string['addtag'] = 'Add tag';
-$string['relationshiptags'] = 'Tags list of relationship \'{$a}\'';
-$string['edittagof'] = 'Edit tags of \'{$a}\'';
-$string['deltagof'] = 'Delete tag of \'{$a}\''; 
-$string['delconfirmtag'] = 'Do you really want to delete tag \'{$a}\'?';
-$string['tagname'] = 'Tag name:';
-$string['no_delete_tag'] = 'You don\'t have permition to remove tags from other sources.';
-$string['tag_already_exists'] = 'This tag already exists. Please use another tag\'s name.';
-$string['group_already_exists'] = 'This group already exists. Please use another group\'s name.';
-$string['relationship_already_exists'] = 'This relationship already exists. Please use another relationship\'s name.';
+$string['nocomponent'] = 'Criado manualmente';
+$string['potusers'] = 'Potenciais usuários';
+$string['potusersmatching'] = 'Possíveis usuários que conferem';
+$string['removeuserwarning'] = 'A remoção de usuários de um relacionamento pode resultar no cancelamento da inscrição de usuários em múltiplos cursos o que inclui a remoção de configurações de usuários, notas, participação em grupos e outras informações dos cursos afetados.';
+$string['removegroupwarning'] = 'A remoção de grupos de um relacionamento pode resultar no cancelamento da inscrição de usuários em múltiplos cursos o que inclui a remoção de configurações de usuários, notas, participação em grupos e outras informações dos cursos afetados.';
+$string['deletecohortwarning'] = 'A remoção de papeis/coortes de um relacionamento pode resultar no cancelamento da inscrição de usuários em múltiplos cursos o que inclui a remoção de configurações de usuários, notas, participação em grupos e outras informações dos cursos afetados.';
+$string['selectfromrelationship'] = 'Selecionar membros do relacionamento';
+$string['unknownrelationship'] = 'Relacionamento desconhecido ({$a})!';
+$string['useradded'] = 'Usuário adicionado ao relacionamento "{$a}"';
+$string['tag'] = 'Etiqueta';
+$string['tags'] = 'Etiquetas';
+$string['addtag'] = 'Adicionar etiqueta';
+$string['relationshiptags'] = 'Lista de etiquetas do relacionamento \'{$a}\'';
+$string['edittagof'] = 'Editar etiquetas de \'{$a}\'';
+$string['deltagof'] = 'Remover etiqueta de \'{$a}\''; 
+$string['delconfirmtag'] = 'Você realmente quer Remover esta etiqueta \'{$a}\'?';
+$string['tagname'] = 'Nome da etiqueta:';
+$string['no_delete_tag'] = 'Não é permitido remover etiquetas criadas por outros módulos.';
+$string['tag_already_exists'] = 'Esta etiqueta já existe. Entre com outro nome para a etiqueta!';
+$string['group_already_exists'] = 'Este grupo já existe. Entre com outro nome para o grupo!';
+$string['relationship_already_exists'] = 'Já existe relacionamento com este nome neste contexto. Ofereça outro nome para o relacionamento.';
