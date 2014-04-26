@@ -79,386 +79,6 @@ function relationship_get_relationship($relationshipid) {
     return $relationship;
 }
 
-/**
- * Add new relationship.
- *
- * @param  stdClass $relationship
- * @return int new relationship id
- */
-function relationship_add_relationship($relationship) {
-    global $DB;
-
-    if (!isset($relationship->name)) {
-        throw new coding_exception('Missing relationship name in relationship_add_relationship().');
-    }
-    if (!isset($relationship->idnumber)) {
-        $relationship->idnumber = NULL;
-    }
-    if (!isset($relationship->description)) {
-        $relationship->description = '';
-    }
-    if (!isset($relationship->descriptionformat)) {
-        $relationship->descriptionformat = FORMAT_HTML;
-    }
-    if (empty($relationship->component)) {
-        $relationship->component = '';
-    }
-    if (!isset($relationship->timecreated)) {
-        $relationship->timecreated = time();
-    }
-    if (!isset($relationship->timemodified)) {
-        $relationship->timemodified = $relationship->timecreated;
-    }
-
-    $relationship->id = $DB->insert_record('relationship', $relationship);
-    tag_set('relationship', $relationship->id, $relationship->tags);
-
-    $event = \local_relationship\event\relationship_created::create(array(
-        'context' => context::instance_by_id($relationship->contextid),
-        'objectid' => $relationship->id,
-    ));
-    $event->add_record_snapshot('relationship', $relationship);
-    $event->trigger();
-
-    return $relationship->id;
-}
-
-/**
- * Update existing relationship.
- * @param  stdClass $relationship
- * @return void
- */
-function relationship_update_relationship($relationship) {
-    global $DB;
-
-    if (property_exists($relationship, 'component') and empty($relationship->component)) {
-        // prevent NULLs
-        $relationship->component = '';
-    }
-    $relationship->timemodified = time();
-    $DB->update_record('relationship', $relationship);
-    tag_set('relationship', $relationship->id, $relationship->tags);
-
-    $event = \local_relationship\event\relationship_updated::create(array(
-        'context' => context::instance_by_id($relationship->contextid),
-        'objectid' => $relationship->id,
-    ));
-    $event->add_record_snapshot('relationship', $relationship);
-    $event->trigger();
-}
-
-/**
- * Delete relationship.
- * @param  stdClass $relationship
- * @return void
- */
-function relationship_delete_relationship($relationship) {
-    global $DB;
-
-    if ($relationship->component) {
-        // TODO: add component delete callback
-    }
-
-    $relationshipgroups = $DB->get_records('relationship_groups', array('relationshipid'=>$relationship->id));
-    foreach($relationshipgroups AS $g) {
-        $DB->delete_records('relationship_members', array('relationshipgroupid'=>$g->id));
-        $DB->delete_records('relationship_groups', array('id'=>$g->id));
-    }
-
-    $DB->delete_records('relationship_cohorts', array('relationshipid'=>$relationship->id));
-
-    $tags = tag_get_tags_array('relationship', $relationship->id);
-    tag_delete(array_keys($tags));
-
-    $DB->delete_records('relationship', array('id'=>$relationship->id));
-
-    $event = \local_relationship\event\relationship_deleted::create(array(
-        'context' => context::instance_by_id($relationship->contextid),
-        'objectid' => $relationship->id,
-    ));
-    $event->add_record_snapshot('relationship', $relationship);
-    $event->trigger();
-}
-
-function relationship_add_group($relationshipgroup) {
-    global $DB;
-
-    if (!isset($relationshipgroup->name)) {
-        throw new coding_exception('Missing relationshipgroup name in relationshipgroup_add_group().');
-    }
-    $relationshipgroup->name = trim($relationshipgroup->name);
-    if (!isset($relationshipgroup->timecreated)) {
-        $relationshipgroup->timecreated = time();
-    }
-    if (!isset($relationshipgroup->timemodified)) {
-        $relationshipgroup->timemodified = $relationshipgroup->timecreated;
-    }
-
-    $relationshipgroup->id = $DB->insert_record('relationship_groups', $relationshipgroup);
-    $relationship = $DB->get_record('relationship', array('id' => $relationshipgroup->relationshipid), '*', MUST_EXIST);
-
-    $event = \local_relationship\event\relationshipgroup_created::create(array(
-        'context' => context::instance_by_id($relationship->contextid),
-        'objectid' => $relationshipgroup->id,
-    ));
-    $event->add_record_snapshot('relationship_groups', $relationshipgroup);
-    $event->trigger();
-
-    return $relationshipgroup->id;
-}
-
-function relationship_update_group($relationshipgroup) {
-    global $DB;
-
-    $relationshipgroup->timemodified = time();
-    if (isset($relationshipgroup->name)) {
-        $relationshipgroup->name = trim($relationshipgroup->name);
-    }
-    $DB->update_record('relationship_groups', $relationshipgroup);
-    $relationship = $DB->get_record('relationship', array('id' => $relationshipgroup->relationshipid), '*', MUST_EXIST);
-
-    $event = \local_relationship\event\relationshipgroup_updated::create(array(
-        'context' => context::instance_by_id($relationship->contextid),
-        'objectid' => $relationshipgroup->id,
-    ));
-    $event->add_record_snapshot('relationship_groups', $relationshipgroup);
-    $event->trigger();
-}
-
-function relationship_delete_group($relationshipgroup) {
-    global $DB;
-
-    $DB->delete_records('relationship_members', array('relationshipgroupid'=>$relationshipgroup->id));
-    $DB->delete_records('relationship_groups', array('id'=>$relationshipgroup->id));
-    $relationship = $DB->get_record('relationship', array('id' => $relationshipgroup->relationshipid), '*', MUST_EXIST);
-
-    $event = \local_relationship\event\relationshipgroup_deleted::create(array(
-        'context' => context::instance_by_id($relationship->contextid),
-        'objectid' => $relationshipgroup->id,
-    ));
-    $event->add_record_snapshot('relationship_groups', $relationshipgroup);
-    $event->trigger();
-}
-
-function relationship_add_cohort($relationshipcohort) {
-    global $DB;
-
-    if (!isset($relationshipcohort->timecreated)) {
-        $relationshipcohort->timecreated = time();
-    }
-    if (!isset($relationshipcohort->timemodified)) {
-        $relationshipcohort->timemodified = $relationshipcohort->timecreated;
-    }
-
-    $relationshipcohort->id = $DB->insert_record('relationship_cohorts', $relationshipcohort);
-    return $relationshipcohort->id;
-}
-
-function relationship_update_cohort($relationshipcohort) {
-    global $DB;
-
-    $relationshipcohort->timemodified = time();
-    $DB->update_record('relationship_cohorts', $relationshipcohort);
-}
-
-function relationship_delete_cohort($relationshipcohort) {
-    global $DB;
-
-    $DB->delete_records('relationship_members', array('relationshipcohortid'=>$relationshipcohort->id));
-    $DB->delete_records('relationship_cohorts', array('id'=>$relationshipcohort->id));
-/*
-    $relationship = $DB->get_record('relationship', array('id' => $relationshipcohort->relationshipid), '*', MUST_EXIST);
-
-    $event = \local_relationship\event\relationshipcohort_deleted::create(array(
-        'context' => context::instance_by_id($relationship->contextid),
-        'objectid' => $relationshipcohort->id,
-    ));
-    $event->add_record_snapshot('relationship_cohorts', $relationshipcohort);
-    $event->trigger();
-    */
-}
-
-/**
- * Somehow deal with relationships when deleting course category,
- * we can not just delete them because they might be used in enrol
- * plugins or referenced in external systems.
- * @param  stdClass|coursecat $category
- * @return void
- */
-function relationship_delete_category($category) {
-    global $DB;
-    // TODO: make sure that relationships are really, really not used anywhere and delete, for now just move to parent or system context
-
-    $oldcontext = context_coursecat::instance($category->id);
-
-    if ($category->parent and $parent = $DB->get_record('course_categories', array('id'=>$category->parent))) {
-        $parentcontext = context_coursecat::instance($parent->id);
-        $sql = "UPDATE {relationship} SET contextid = :newcontext WHERE contextid = :oldcontext";
-        $params = array('oldcontext'=>$oldcontext->id, 'newcontext'=>$parentcontext->id);
-    } else {
-        $syscontext = context_system::instance();
-        $sql = "UPDATE {relationship} SET contextid = :newcontext WHERE contextid = :oldcontext";
-        $params = array('oldcontext'=>$oldcontext->id, 'newcontext'=>$syscontext->id);
-    }
-
-    $DB->execute($sql, $params);
-}
-
-/**
- * Add relationship member
- * @param  int $relationshipid
- * @param  int $userid
- * @return void
- */
-function relationship_add_member($relationshipgroupid, $relationshipcohortid, $userid) {
-    global $DB;
-
-    if ($DB->record_exists('relationship_members', array('relationshipgroupid'=>$relationshipgroupid, 'userid'=>$userid,
-                                                         'relationshipcohortid'=> $relationshipcohortid))) {
-        // No duplicates!
-        return;
-    }
-
-    $record = new stdClass();
-    $record->relationshipgroupid = $relationshipgroupid;
-    $record->relationshipcohortid = $relationshipcohortid;
-    $record->userid    = $userid;
-    $record->timeadded = time();
-    $record->id = $DB->insert_record('relationship_members', $record);
-
-/*
-    $relationshipgroup = $DB->get_record('relationship_groups', array('id' => $relationshipgroupid), '*', MUST_EXIST);
-    $relationshipcohort = $DB->get_record('relationship_cohorts', array('id' => $relationshipcohortid), '*', MUST_EXIST);
-    $relationship = $DB->get_record('relationship', array('id' => $relationshipgroup->relationshipid), '*', MUST_EXIST);
-
-    $event = \local_relationship\event\relationshipgroup_member_added::create(array(
-        'context' => context::instance_by_id($relationship->contextid),
-        'objectid' => $relationshipgroupid,
-        'relateduserid' => $userid,
-        'other' => $relationshipcohort->roleid,
-    ));
-    $event->add_record_snapshot('relationship_groups', $relationshipgroup);
-    $event->trigger();
-*/
-}
-
-/**
- * Remove relationshgroupip member
- * @param  int $relationshipgroupid
- * @param  int $userid
- * @param  int $roleid
- * @return void
- */
-function relationship_remove_member($relationshipgroupid, $relationshipcohortid, $userid) {
-    global $DB;
-
-    $DB->delete_records('relationship_members', array('relationshipgroupid'=>$relationshipgroupid, 'userid'=>$userid,
-                                                      'relationshipcohortid'=>$relationshipcohortid));
-
-/*
-    $relationshipgroup = $DB->get_record('relationship_groups', array('id' => $relationshipgroupid), '*', MUST_EXIST);
-
-    $event = \local_relationship\event\relationshipgroup_member_removed::create(array(
-        'context' => context::instance_by_id($relationship->contextid),
-        'objectid' => $relationshipgroupid,
-        'relateduserid' => $userid,
-        'other' => $roleid,
-    ));
-    $event->add_record_snapshot('relationship_groups', $relationshipgroup);
-    $event->trigger();
-*/
-}
-
-/**
- * Returns list of relationships from course parent contexts.
- *
- * Note: this function does not implement any capability checks,
- *       it means it may disclose existence of relationships,
- *       make sure it is displayed to users with appropriate rights only.
- *
- * @param  stdClass $course
- * @param  bool $onlyenrolled true means include only relationships with enrolled users
- * @return array of relationship names with number of enrolled users
- */
-function relationship_get_visible_list($course, $onlyenrolled=true) {
-    global $DB;
-
-    $context = context_course::instance($course->id);
-    list($esql, $params) = get_enrolled_sql($context);
-    list($parentsql, $params2) = $DB->get_in_or_equal($context->get_parent_context_ids(), SQL_PARAMS_NAMED);
-    $params = array_merge($params, $params2);
-
-    if ($onlyenrolled) {
-        $left = "";
-        $having = "HAVING COUNT(u.id) > 0";
-    } else {
-        $left = "LEFT";
-        $having = "";
-    }
-
-    $sql = "SELECT c.id, c.name, c.contextid, c.idnumber, COUNT(u.id) AS cnt
-              FROM {relationship} c
-        $left JOIN ({relationship_members} rm
-                   JOIN ($esql) u ON u.id = rm.userid) ON rm.relationshipid = c.id
-             WHERE c.contextid $parentsql
-          GROUP BY c.id, c.name, c.contextid, c.idnumber
-           $having
-          ORDER BY c.name, c.idnumber";
-
-    $relationships = $DB->get_records_sql($sql, $params);
-
-    foreach ($relationships as $cid=>$relationship) {
-        $relationships[$cid] = format_string($relationship->name, true, array('context'=>$relationship->contextid));
-        if ($relationship->cnt) {
-            $relationships[$cid] .= ' (' . $relationship->cnt . ')';
-        }
-    }
-
-    return $relationships;
-}
-
-/**
- * Get all the relationships defined in given context.
- *
- * @param int $contextid
- * @param int $page number of the current page
- * @param int $perpage items per page
- * @param string $search search string
- * @return array    Array(totalrelationships => int, relationships => array, allrelationships => int)
- */
-function relationship_search_relationships($contextid, $page = 0, $perpage = 25, $search = '') {
-    global $DB;
-
-    // Add some additional sensible conditions
-    $tests = array('contextid = ?');
-    $params = array($contextid);
-
-    if (!empty($search)) {
-        $conditions = array('name', 'idnumber', 'description');
-        $searchparam = '%' . $DB->sql_like_escape($search) . '%';
-        foreach ($conditions as $key=>$condition) {
-            $conditions[$key] = $DB->sql_like($condition, "?", false);
-            $params[] = $searchparam;
-        }
-        $tests[] = '(' . implode(' OR ', $conditions) . ')';
-    }
-    $wherecondition = implode(' AND ', $tests);
-
-    $fields = "SELECT *";
-    $countfields = "SELECT COUNT(1)";
-    $sql = " FROM {relationship}
-             WHERE $wherecondition";
-    $order = " ORDER BY name ASC";
-    $allrelationships = $DB->count_records('relationship', array('contextid'=>$contextid));
-    $totalrelationships = $DB->count_records_sql($countfields . $sql, $params);
-    $relationships = $DB->get_records_sql($fields . $sql . $order, $params, $page*$perpage, $perpage);
-    foreach($relationships as $rl) {
-        $rl->tags = tag_get_tags_array('relationship', $rl->id);
-    }
-
-    return array('totalrelationships' => $totalrelationships, 'relationships' => $relationships, 'allrelationships'=>$allrelationships);
-}
-
 function relationship_get_cohorts($relationshipid, $full=true) {
     global $DB;
 
@@ -514,19 +134,337 @@ function relationship_get_courses($relationshipid) {
     return $DB->get_records_sql($sql, array('relationshipid'=>$relationshipid));
 }
 
-function relationship_uniformly_distribute_users($relationship, $userids=array()) {
+/**
+ * Add new relationship.
+ *
+ * @param  stdClass $relationship
+ * @return int new relationship id
+ */
+function relationship_add_relationship($relationship) {
+    global $DB;
+
+    if (!isset($relationship->name)) {
+        throw new coding_exception('Missing relationship name in relationship_add_relationship().');
+    }
+    $relationship->name = trim($relationship->name);
+    if (!isset($relationship->idnumber)) {
+        $relationship->idnumber = NULL;
+    }
+    if (!isset($relationship->description)) {
+        $relationship->description = '';
+    }
+    if (!isset($relationship->descriptionformat)) {
+        $relationship->descriptionformat = FORMAT_HTML;
+    }
+    if (empty($relationship->component)) {
+        $relationship->component = '';
+    }
+    if (!isset($relationship->timecreated)) {
+        $relationship->timecreated = time();
+    }
+    if (!isset($relationship->timemodified)) {
+        $relationship->timemodified = $relationship->timecreated;
+    }
+
+    $relationship->id = $DB->insert_record('relationship', $relationship);
+    tag_set('relationship', $relationship->id, $relationship->tags);
+
+    $event = \local_relationship\event\relationship_created::create(array(
+        'context' => context::instance_by_id($relationship->contextid),
+        'objectid' => $relationship->id,
+    ));
+    $event->add_record_snapshot('relationship', $relationship);
+    $event->trigger();
+
+    return $relationship->id;
+}
+
+/**
+ * Update existing relationship.
+ * @param  stdClass $relationship
+ * @return void
+ */
+function relationship_update_relationship($relationship) {
+    global $DB;
+
+    $relationship->timemodified = time();
+    $DB->update_record('relationship', $relationship);
+    tag_set('relationship', $relationship->id, $relationship->tags);
+
+    $event = \local_relationship\event\relationship_updated::create(array(
+        'context' => context::instance_by_id($relationship->contextid),
+        'objectid' => $relationship->id,
+    ));
+    $event->add_record_snapshot('relationship', $relationship);
+    $event->trigger();
+}
+
+/**
+ * Delete relationship.
+ * @param  stdClass $relationship
+ * @return void
+ */
+function relationship_delete_relationship($relationship) {
+    global $DB;
+
+    $relationshipgroups = $DB->get_records('relationship_groups', array('relationshipid'=>$relationship->id));
+    foreach($relationshipgroups AS $g) {
+        relationship_delete_group($g);
+    }
+
+    $DB->delete_records('relationship_cohorts', array('relationshipid'=>$relationship->id));
+
+    $tags = tag_get_tags_array('relationship', $relationship->id);
+    tag_delete(array_keys($tags));
+
+    $DB->delete_records('relationship', array('id'=>$relationship->id));
+
+    $event = \local_relationship\event\relationship_deleted::create(array(
+        'context' => context::instance_by_id($relationship->contextid),
+        'objectid' => $relationship->id,
+    ));
+    $event->add_record_snapshot('relationship', $relationship);
+    $event->trigger();
+}
+
+function relationship_add_group($relationshipgroup) {
+    global $DB;
+
+    $relationshipgroup->name = trim($relationshipgroup->name);
+    if (!isset($relationshipgroup->timecreated)) {
+        $relationshipgroup->timecreated = time();
+    }
+    if (!isset($relationshipgroup->timemodified)) {
+        $relationshipgroup->timemodified = $relationshipgroup->timecreated;
+    }
+
+    $relationship = $DB->get_record('relationship', array('id' => $relationshipgroup->relationshipid), '*', MUST_EXIST);
+    $relationshipgroup->id = $DB->insert_record('relationship_groups', $relationshipgroup);
+
+    $event = \local_relationship\event\relationshipgroup_created::create(array(
+        'context' => context::instance_by_id($relationship->contextid),
+        'objectid' => $relationshipgroup->id,
+    ));
+    $event->add_record_snapshot('relationship_groups', $relationshipgroup);
+    $event->add_record_snapshot('relationship', $relationship);
+    $event->trigger();
+
+    return $relationshipgroup->id;
+}
+
+function relationship_update_group($relationshipgroup) {
+    global $DB;
+
+    $relationshipgroup->timemodified = time();
+    if (isset($relationshipgroup->name)) {
+        $relationshipgroup->name = trim($relationshipgroup->name);
+    }
+    $DB->update_record('relationship_groups', $relationshipgroup);
+    $relationship = $DB->get_record('relationship', array('id' => $relationshipgroup->relationshipid), '*', MUST_EXIST);
+
+    $event = \local_relationship\event\relationshipgroup_updated::create(array(
+        'context' => context::instance_by_id($relationship->contextid),
+        'objectid' => $relationshipgroup->id,
+    ));
+    $event->add_record_snapshot('relationship_groups', $relationshipgroup);
+    $event->add_record_snapshot('relationship', $relationship);
+    $event->trigger();
+}
+
+function relationship_delete_group($relationshipgroup) {
+    global $DB;
+
+    $relationship = $DB->get_record('relationship', array('id' => $relationshipgroup->relationshipid), '*', MUST_EXIST);
+    $DB->delete_records('relationship_members', array('relationshipgroupid'=>$relationshipgroup->id));
+    $DB->delete_records('relationship_groups', array('id'=>$relationshipgroup->id));
+
+    $event = \local_relationship\event\relationshipgroup_deleted::create(array(
+        'context' => context::instance_by_id($relationship->contextid),
+        'objectid' => $relationshipgroup->id,
+    ));
+    $event->add_record_snapshot('relationship_groups', $relationshipgroup);
+    $event->add_record_snapshot('relationship', $relationship);
+    $event->trigger();
+}
+
+function relationship_add_cohort($relationshipcohort) {
+    global $DB;
+
+    if (!isset($relationshipcohort->timecreated)) {
+        $relationshipcohort->timecreated = time();
+    }
+    if (!isset($relationshipcohort->timemodified)) {
+        $relationshipcohort->timemodified = $relationshipcohort->timecreated;
+    }
+
+    $relationshipcohort->id = $DB->insert_record('relationship_cohorts', $relationshipcohort);
+    return $relationshipcohort->id;
+}
+
+function relationship_update_cohort($relationshipcohort) {
+    global $DB;
+
+    $relationshipcohort->timemodified = time();
+    $DB->update_record('relationship_cohorts', $relationshipcohort);
+}
+
+function relationship_delete_cohort($relationshipcohort) {
+    global $DB;
+
+    $members = $DB->get_records('relationship_members', array('relationshipcohortid'=>$relationshipcohort->id));
+    foreach($members as $m) {
+        relationship_remove_member($m->relationshipgroupid, $m->relationshipcohortid, $m->userid);
+    }
+    $DB->delete_records('relationship_cohorts', array('id'=>$relationshipcohort->id));
+}
+
+/**
+ * Somehow deal with relationships when deleting course category,
+ * we can not just delete them because they might be used in enrol
+ * plugins or referenced in external systems.
+ * @param  stdClass|coursecat $category
+ * @return void
+ */
+function relationship_delete_category($category) {
+    global $DB;
+    // TODO: make sure that relationships are really, really not used anywhere and delete, for now just move to parent or system context
+
+    $oldcontext = context_coursecat::instance($category->id);
+
+    if ($category->parent and $parent = $DB->get_record('course_categories', array('id'=>$category->parent))) {
+        $parentcontext = context_coursecat::instance($parent->id);
+        $sql = "UPDATE {relationship} SET contextid = :newcontext WHERE contextid = :oldcontext";
+        $params = array('oldcontext'=>$oldcontext->id, 'newcontext'=>$parentcontext->id);
+    } else {
+        $syscontext = context_system::instance();
+        $sql = "UPDATE {relationship} SET contextid = :newcontext WHERE contextid = :oldcontext";
+        $params = array('oldcontext'=>$oldcontext->id, 'newcontext'=>$syscontext->id);
+    }
+
+    $DB->execute($sql, $params);
+}
+
+/**
+ * Add relationship member
+ * @param  int $relationshipid
+ * @param  int $userid
+ * @return void
+ */
+function relationship_add_member($relationshipgroupid, $relationshipcohortid, $userid) {
+    global $DB;
+
+    if ($DB->record_exists('relationship_members', array('relationshipgroupid'=>$relationshipgroupid, 'userid'=>$userid,
+                                                         'relationshipcohortid'=> $relationshipcohortid))) {
+        // No duplicates!
+        return;
+    }
+
+    $relationshipgroup = $DB->get_record('relationship_groups', array('id' => $relationshipgroupid), '*', MUST_EXIST);
+    $relationshipcohort = $DB->get_record('relationship_cohorts', array('id' => $relationshipcohortid), '*', MUST_EXIST);
+    $relationship = $DB->get_record('relationship', array('id' => $relationshipgroup->relationshipid), '*', MUST_EXIST);
+
+    $record = new stdClass();
+    $record->relationshipgroupid = $relationshipgroupid;
+    $record->relationshipcohortid = $relationshipcohortid;
+    $record->userid    = $userid;
+    $record->timeadded = time();
+    $record->id = $DB->insert_record('relationship_members', $record);
+
+    $event = \local_relationship\event\relationshipgroup_member_added::create(array(
+        'context' => context::instance_by_id($relationship->contextid),
+        'objectid' => $relationshipgroupid,
+        'relateduserid' => $userid,
+        'other' => $relationshipcohort->roleid,
+    ));
+    $event->add_record_snapshot('relationship_groups', $relationshipgroup);
+    $event->add_record_snapshot('relationship', $relationship);
+    $event->trigger();
+}
+
+/**
+ * Remove relationshgroupip member
+ * @param  int $relationshipgroupid
+ * @param  int $userid
+ * @param  int $roleid
+ * @return void
+ */
+function relationship_remove_member($relationshipgroupid, $relationshipcohortid, $userid) {
+    global $DB;
+
+    $DB->delete_records('relationship_members', array('relationshipgroupid'=>$relationshipgroupid, 'userid'=>$userid,
+                                                      'relationshipcohortid'=>$relationshipcohortid));
+
+    $relationshipgroup = $DB->get_record('relationship_groups', array('id' => $relationshipgroupid), '*', MUST_EXIST);
+    $relationshipcohort = $DB->get_record('relationship_cohorts', array('id' => $relationshipcohortid), '*', MUST_EXIST);
+    $relationship = $DB->get_record('relationship', array('id' => $relationshipgroup->relationshipid), '*', MUST_EXIST);
+
+    $event = \local_relationship\event\relationshipgroup_member_removed::create(array(
+        'context' => context::instance_by_id($relationship->contextid),
+        'objectid' => $relationshipgroupid,
+        'relateduserid' => $userid,
+        'other' => $relationshipcohort->roleid,
+    ));
+    $event->add_record_snapshot('relationship_groups', $relationshipgroup);
+    $event->add_record_snapshot('relationship', $relationship);
+    $event->trigger();
+}
+
+/**
+ * Get all the relationships defined in given context.
+ *
+ * @param int $contextid
+ * @param int $page number of the current page
+ * @param int $perpage items per page
+ * @param string $search search string
+ * @return array    Array(totalrelationships => int, relationships => array, allrelationships => int)
+ */
+function relationship_search_relationships($contextid, $page = 0, $perpage = 25, $search = '') {
+    global $DB;
+
+    // Add some additional sensible conditions
+    $tests = array('contextid = ?');
+    $params = array($contextid);
+
+    if (!empty($search)) {
+        $conditions = array('name', 'idnumber', 'description');
+        $searchparam = '%' . $DB->sql_like_escape($search) . '%';
+        foreach ($conditions as $key=>$condition) {
+            $conditions[$key] = $DB->sql_like($condition, "?", false);
+            $params[] = $searchparam;
+        }
+        $tests[] = '(' . implode(' OR ', $conditions) . ')';
+    }
+    $wherecondition = implode(' AND ', $tests);
+
+    $fields = "SELECT *";
+    $countfields = "SELECT COUNT(1)";
+    $sql = " FROM {relationship}
+             WHERE $wherecondition";
+    $order = " ORDER BY name ASC";
+    $allrelationships = $DB->count_records('relationship', array('contextid'=>$contextid));
+    $totalrelationships = $DB->count_records_sql($countfields . $sql, $params);
+    $relationships = $DB->get_records_sql($fields . $sql . $order, $params, $page*$perpage, $perpage);
+    foreach($relationships as $rl) {
+        $rl->tags = tag_get_tags_array('relationship', $rl->id);
+    }
+
+    return array('totalrelationships' => $totalrelationships, 'relationships' => $relationships, 'allrelationships'=>$allrelationships);
+}
+
+function relationship_uniformly_distribute_users($relationshipcohort, $userids) {
     global $DB;
 
     if(empty($userids)) {
         return;
     }
+
     $sql = "SELECT rg.id, count(DISTINCT rm.userid) as count
-              FROM relationship rl
-              JOIN relationship_groups rg ON (rg.relationshipid = rl.id AND rg.uniformdistribution = 1)
-         LEFT JOIN relationship_members rm ON (rm.relationshipgroupid = rg.id AND rm.roletype = 2)
-             WHERE rl.id = :relationshipid
+              FROM {relationship_cohorts} rc
+              JOIN {relationship_groups} rg ON (rg.relationshipid = rc.relationshipid AND rg.uniformdistribution = 1)
+         LEFT JOIN {relationship_members} rm ON (rm.relationshipgroupid = rg.id AND rm.relationshipcohortid = rc.id)
+             WHERE rc.id = :relationshipcohortid
           GROUP BY rg.id";
-    $groups = $DB->get_records_sql($sql, array('relationshipid'=>$relationship->id));
+    $groups = $DB->get_records_sql($sql, array('relationshipcohortid'=>$relationshipcohort->id));
     if(!empty($groups)) {
         foreach($userids AS $userid) {
             $min = 99999999;
@@ -537,7 +475,7 @@ function relationship_uniformly_distribute_users($relationship, $userids=array()
                     $gmin = $grpid;
                 }
             }
-            relationshipgroup_add_member($gmin, $userid, $relationship->roleid2);
+            relationship_add_member($gmin, $relationshipcohort->id, $userid);
             $groups[$gmin]->count++;
         }
     }
@@ -546,26 +484,30 @@ function relationship_uniformly_distribute_users($relationship, $userids=array()
 function relationship_uniformly_distribute_members($relationshipid=NULL) {
     global $DB;
 
-    $params = array('uniformdistribution'=>1);
+    $params = array();
+    $cond = '';
     if(!empty($relationshipid)) {
         $params['id'] = $relationshipid;
+        $cond = 'WHERE rl.id = :id';
     }
-    $relationships = $DB->get_records('relationship', $params);
-    foreach($relationships AS $rl) {
-        $sql = "SELECT rm.userid
-                  FROM relationship rl
-                  JOIN cohort ch ON (ch.id = rl.cohortid2)
-                  JOIN cohort_members rm ON (rm.cohortid = ch.id)
-             LEFT JOIN (SELECT rm.userid
-                          FROM relationship rlj
-                          JOIN relationship_groups rg ON (rg.relationshipid = rlj.id)
-                          JOIN relationship_members rm ON (rm.relationshipgroupid = rg.id AND rm.roletype = 2)
-                         WHERE rlj.id = :jrelationshipid) rmj
-                    ON (rmj.userid = rm.userid)
-                 WHERE rl.id = :relationshipid
-                   AND rmj.userid IS NULL";
-        $users = $DB->get_records_sql($sql, array('relationshipid'=>$rl->id, 'jrelationshipid'=>$rl->id));
-        relationship_uniformly_distribute_users($rl, array_keys($users));
+
+    $sql = "SELECT DISTINCT rc.*
+              FROM {relationship} rl
+              JOIN {relationship_cohorts} rc ON (rc.relationshipid = rl.id AND rc.uniformdistribution = 1)
+              JOIN {relationship_groups} rg ON (rg.relationshipid = rl.id AND rc.uniformdistribution = 1)
+              {$cond}";
+    $rcs = $DB->get_records_sql($sql, $params);
+    foreach($rcs AS $rc) {
+        $params = array('relationshipid'=>$rc->relationshipid, 'relationshipcohortid'=>$rc->id);
+        $sql = " SELECT cm.userid
+                   FROM {relationship_cohorts} rc
+                   JOIN {cohort} ch ON (ch.id = rc.cohortid)
+                   JOIN {cohort_members} cm ON (cm.cohortid = ch.id)
+         LEFT JOIN {relationship_members} rm ON (rm.relationshipcohortid = rc.id AND rm.userid = cm.userid)
+                  WHERE rc.id = :relationshipcohortid
+                    AND ISNULL(rm.userid)";
+        $users = $DB->get_records_sql($sql, $params);
+        relationship_uniformly_distribute_users($rc, array_keys($users));
     }
 }
 
@@ -730,6 +672,24 @@ class relationship_existing_selector extends user_selector_base {
 class local_relationship_handler {
 
     /**
+     * Event processor - cohort removed.
+     * @param \core\event\cohort_deleted $event
+     * @return bool
+     */
+    public static function cohort_removed(\core\event\cohort_deleted $event) {
+        global $DB;
+
+/*
+        if($rels = $DB->get_records('relationship', array('uniformdistribution'=>1, 'cohortid2'=>$event->objectid))) {
+            foreach($rels AS $rel) {
+                relationship_uniformly_distribute_users($rel, array($event->relateduserid));
+            }
+        }
+*/
+        return true;
+    }
+
+    /**
      * Event processor - cohort member added.
      * @param \core\event\cohort_member_added $event
      * @return bool
@@ -737,9 +697,10 @@ class local_relationship_handler {
     public static function member_added(\core\event\cohort_member_added $event) {
         global $DB;
 
-        if($rels = $DB->get_records('relationship', array('uniformdistribution'=>1, 'cohortid2'=>$event->objectid))) {
-            foreach($rels AS $rel) {
-                relationship_uniformly_distribute_users($rel, array($event->relateduserid));
+        if($rcs = $DB->get_records('relationship_cohorts', array('uniformdistribution'=>1, 'cohortid'=>$event->objectid))) {
+            $user = array($event->relateduserid);
+            foreach($rcs AS $rc) {
+                relationship_uniformly_distribute_users($rc, $user);
             }
         }
         return true;
@@ -753,19 +714,16 @@ class local_relationship_handler {
     public static function member_removed(\core\event\cohort_member_removed $event) {
         global $DB;
 
-        $cohortid = $event->objectid;
-        $userid = $event->relateduserid;
-        $sql = "SELECT rm.relationshipgroupid, rc.relationshipcohortid, rm.userid
-                  FROM relationship_cohorts rc
-                  JOIN relationship rl ON (rl.id = rc.relationshipid)
-                  JOIN relationship_groups rg ON (rg.relationshipid = rc.relationshipid)
-                  JOIN relationship_members rm ON (rm.relationshipgroupid = rg.id AND rm.relationshipcohortid = rc.id)
+        $sql = "SELECT rm.relationshipgroupid, rm.relationshipcohortid, rm.userid
+                  FROM {relationship_cohorts} rc
+                  JOIN {relationship_groups} rg ON (rg.relationshipid = rc.relationshipid)
+                  JOIN {relationship_members} rm ON (rm.relationshipgroupid = rg.id AND rm.relationshipcohortid = rc.id)
                  WHERE rc.cohortid = :cohortid
-                   AND rm.userid = :userid
-                   AND rl.enabled = 1";
-        $rs = $DB->get_recordset_sql($sql, array('cohortid'=>$cohortid, 'userid'=>$userid));
+                   AND rm.userid = :userid";
+        $params = array('cohortid'=>$event->objectid, 'userid'=>$event->relateduserid);
+        $rs = $DB->get_records_sql($sql, $params);
         foreach($rs AS $rec) {
-            relationship_remove_member($rec->relationshipgroupid, $rec->relationshipcohortid, $userid);
+            relationship_remove_member($rec->relationshipgroupid, $rec->relationshipcohortid, $rec->userid);
         }
         return true;
     }

@@ -19,12 +19,11 @@ if($relationshipcohortid = optional_param('relationshipcohortid', 0, PARAM_INT))
     $relationshipcohort->cohortid = 0;
     $relationshipcohort->allowdupsingroups   = 0;
     $relationshipcohort->uniformdistribution = 0;
-    $relationshipcohort->enabled  = 0;
 }
 
 $context = context::instance_by_id($relationship->contextid, MUST_EXIST);
 require_capability('local/relationship:manage', $context);
-if (!empty($relationship->component) || $relationship->enabled) {
+if (!empty($relationship->component)) {
     print_error('cantedit', 'local_relationship');
 }
 

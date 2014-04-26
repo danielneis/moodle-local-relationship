@@ -58,7 +58,6 @@ foreach($relationships['relationships'] as $relationship) {
     $line[] = implode(', ', $relationship->tags);
 
     $line[] = empty($relationship->component) ? get_string('nocomponent', 'local_relationship') : get_string('pluginname', $relationship->component);
-    $line[] = $relationship->enabled ? get_string('yes') : get_string('no');
 
     $buttons = array();
     if (empty($relationship->component)) {
@@ -81,14 +80,13 @@ foreach($relationships['relationships'] as $relationship) {
 }
 
 echo $OUTPUT->box_start('generalbox boxaligncenter boxwidthwide');
-echo $OUTPUT->heading(get_string('relationshipsin', 'local_relationship', $count), 3, 'main');
+echo $OUTPUT->heading(get_string('relationships', 'local_relationship', $count), 3, 'main');
 
 $table = new html_table();
 $table->head  = array(get_string('name', 'local_relationship'),
                       get_string('memberscount', 'local_relationship'),
                       get_string('tags', 'tag'),
                       get_string('component', 'local_relationship'),
-                      get_string('enabled', 'local_relationship'),
                       get_string('edit'));
 $table->colclasses = array('leftalign name', 'leftalign description', 'leftalign size', 'centeralign source', 'centeralign action');
 $table->id = 'relationships';

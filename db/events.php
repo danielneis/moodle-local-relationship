@@ -36,4 +36,9 @@ $observers = array(
         'callback' => 'local_relationship_handler::member_removed',
         'includefile' => '/local/relationship/locallib.php'
     ),
+    array(
+        'eventname' => ' \core\event\cohort_deleted',
+        'callback' => 'local_relationship_handler:cohort_removed',
+        'includefile' => '/local/relationship/locallib.php'
+    ),
 );

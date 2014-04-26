@@ -18,7 +18,8 @@ class relationshipgroup_edit_form extends moodleform {
         $mform->addRule('name', get_string('required'), 'required', null, 'client');
         $mform->setType('name', PARAM_NOTAGS);
 
-        $mform->addElement('selectyesno', 'uniformdistribution', get_string('uniformdistribution', 'local_relationship'));
+//        $mform->addElement('selectyesno', 'uniformdistribution', get_string('uniformdistribute', 'local_relationship'));
+//        $mform->addHelpButton('uniformdistribution', 'uniformdistribute', 'local_relationship');
 
         $mform->addElement('hidden', 'id');
         $mform->setType('id', PARAM_INT);

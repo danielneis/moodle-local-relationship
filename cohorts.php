@@ -11,7 +11,7 @@ $context = context::instance_by_id($relationship->contextid, MUST_EXIST);
 
 require_capability('local/relationship:view', $context);
 $manager = has_capability('local/relationship:manage', $context);
-$editable = $manager && empty($relationship->component) && !$relationship->enabled;
+$editable = $manager && empty($relationship->component);
 
 $baseurl = new moodle_url('/local/relationship/cohorts.php', array('relationshipid'=>$relationship->id));
 $returnurl = new moodle_url('/local/relationship/index.php', array('contextid'=>$context->id));
@@ -28,7 +28,6 @@ foreach($relationshipcohorts as $rch) {
     $line[] = $rch->role_name;
     $line[] = $rch->allowdupsingroups ? get_string('yes') : get_string('no');
     $line[] = $rch->uniformdistribution ? get_string('yes') : get_string('no');
-    $line[] = $rch->enabled ? get_string('yes') : get_string('no');
 
     if($editable) {
         $buttons = array();
@@ -44,9 +43,8 @@ foreach($relationshipcohorts as $rch) {
 $table = new html_table();
 $table->head  = array(get_string('cohort', 'cohort'),
                       get_string('role'),
-                      get_string('allowdupsingroups', 'local_relationship'),
-                      get_string('uniformdistribute', 'local_relationship'),
-                      get_string('enabled', 'local_relationship'),
+                      get_string('allowdupsingroups', 'local_relationship') . $OUTPUT->help_icon('allowdupsingroups', 'local_relationship'),
+                      get_string('uniformdistribute', 'local_relationship') . $OUTPUT->help_icon('uniformdistribute', 'local_relationship'),
                       get_string('edit'));
 $table->colclasses = array('leftalign',
                            'leftalign',
@@ -59,6 +57,7 @@ $table->id = 'relationships';
 $table->attributes['class'] = 'admintable generaltable';
 $table->data = $data;
 
+echo $OUTPUT->box_start('generalbox boxaligncenter boxwidthwide');
 echo html_writer::table($table);
 $text_add = '';
 if ($editable) {
@@ -68,5 +67,6 @@ if ($editable) {
 } else if($manager) {
     echo $OUTPUT->heading(get_string('noeditable', 'local_relationship'));
 }
+echo $OUTPUT->box_end();
 
 echo $OUTPUT->footer();

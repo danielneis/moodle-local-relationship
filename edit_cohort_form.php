@@ -10,18 +10,22 @@ class relationshipcohort_edit_form extends moodleform {
         $mform = $this->_form;
         $relationshipcohort = $this->_customdata['data'];
 
+        $cohorts = relationship_get_cohort_options($relationshipcohort->relationshipid);
+        $mform->addElement('select', 'cohortid', get_string('cohort', 'cohort'), $cohorts);
+
         $roles = relationship_get_role_options();
         $mform->addElement('select', 'roleid', get_string('role'), $roles);
 
-        $cohorts = relationship_get_cohort_options($relationshipcohort->relationshipid);
-        $mform->addElement('select', 'cohortid', get_string('cohort', 'cohort'), $cohorts);
         if($relationshipcohort->id) {
+            $mform->freeze('roleid');
             $mform->freeze('cohortid');
         }
 
         $mform->addElement('selectyesno', 'allowdupsingroups', get_string('allowdupsingroups', 'local_relationship'));
-        $mform->addElement('selectyesno', 'uniformdistribution', get_string('uniformdistribution', 'local_relationship'));
-        $mform->addElement('selectyesno', 'enabled', get_string('enabled', 'local_relationship'));
+        $mform->addHelpButton('allowdupsingroups', 'allowdupsingroups', 'local_relationship');
+
+        $mform->addElement('selectyesno', 'uniformdistribution', get_string('uniformdistribute', 'local_relationship'));
+        $mform->addHelpButton('uniformdistribution', 'uniformdistribute', 'local_relationship');
 
         $mform->addElement('hidden', 'id');
         $mform->setType('id', PARAM_INT);

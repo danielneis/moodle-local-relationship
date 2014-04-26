@@ -13,6 +13,7 @@ $context = context::instance_by_id($relationship->contextid, MUST_EXIST);
 require_capability('local/relationship:view', $context);
 $manager = has_capability('local/relationship:manage', $context);
 $canassign = has_capability('local/relationship:assign', $context);
+$editable = $manager && empty($relationship->component);
 
 $baseurl = new moodle_url('/local/relationship/groups.php', array('relationshipid'=>$relationship->id));
 $returnurl = new moodle_url('/local/relationship/index.php', array('contextid'=>$context->id));
@@ -27,26 +28,29 @@ foreach($relationshipgroups as $relationshipgroup) {
 
     $line[] = format_string($relationshipgroup->name);
     $line[] = $relationshipgroup->size;
-    $line[] = format_string($relationship->component);
+
+    if($relationshipgroup->uniformdistribution) {
+        $status = get_string('yes');
+        $uniformdistribution = 0;
+        $text = get_string('disable', 'local_relationship');
+    } else {
+        $status = get_string('no');
+        $uniformdistribution = 1;
+        $text = get_string('enable', 'local_relationship');
+    }
+    $url = new moodle_url('/local/relationship/edit_group.php', array('relationshipgroupid'=>$relationshipgroup->id, 'uniformdistribution'=>$uniformdistribution));
+    $line[] = $status . ' (' .  html_writer::link($url, $text) . ')';
 
     $buttons = array();
-    if($relationshipgroup->uniformdistribution) {
-        $line[] = get_string('yes');
-    } else {
-        $line[] = get_string('no');
+    if ($editable) {
+        $buttons[] = html_writer::link(new moodle_url('/local/relationship/edit_group.php', array('relationshipgroupid'=>$relationshipgroup->id, 'delete'=>1)),
+            html_writer::empty_tag('img', array('src'=>$OUTPUT->pix_url('t/delete'), 'alt'=>get_string('delete'), 'title'=>get_string('delete'), 'class'=>'iconsmall')));
+        $buttons[] = html_writer::link(new moodle_url('/local/relationship/edit_group.php', array('relationshipgroupid'=>$relationshipgroup->id)),
+            html_writer::empty_tag('img', array('src'=>$OUTPUT->pix_url('t/edit'), 'alt'=>get_string('edit'), 'title'=>get_string('edit'), 'class'=>'iconsmall')));
     }
-
-    if (empty($relationship->component)) {
-        if ($manager) {
-            $buttons[] = html_writer::link(new moodle_url('/local/relationship/edit_group.php', array('relationshipgroupid'=>$relationshipgroup->id, 'delete'=>1)),
-                html_writer::empty_tag('img', array('src'=>$OUTPUT->pix_url('t/delete'), 'alt'=>get_string('delete'), 'title'=>get_string('delete'), 'class'=>'iconsmall')));
-            $buttons[] = html_writer::link(new moodle_url('/local/relationship/edit_group.php', array('relationshipgroupid'=>$relationshipgroup->id)),
-                html_writer::empty_tag('img', array('src'=>$OUTPUT->pix_url('t/edit'), 'alt'=>get_string('edit'), 'title'=>get_string('edit'), 'class'=>'iconsmall')));
-        }
-        if ($manager or $canassign) {
-            $buttons[] = html_writer::link(new moodle_url('/local/relationship/assign.php', array('relationshipgroupid'=>$relationshipgroup->id)),
-                html_writer::empty_tag('img', array('src'=>$OUTPUT->pix_url('t/assignroles'), 'alt'=>get_string('assign', 'local_relationship'), 'title'=>get_string('assign', 'local_relationship'), 'class'=>'iconsmall')));
-        }
+    if ($manager || $canassign) {
+        $buttons[] = html_writer::link(new moodle_url('/local/relationship/assign.php', array('relationshipgroupid'=>$relationshipgroup->id)),
+            html_writer::empty_tag('img', array('src'=>$OUTPUT->pix_url('t/assignroles'), 'alt'=>get_string('assign', 'local_relationship'), 'title'=>get_string('assign', 'local_relationship'), 'class'=>'iconsmall')));
     }
     $line[] = implode(' ', $buttons);
 
@@ -55,12 +59,10 @@ foreach($relationshipgroups as $relationshipgroup) {
 $table = new html_table();
 $table->head  = array(get_string('name', 'local_relationship'),
                       get_string('memberscount', 'local_relationship'),
-                      get_string('component', 'local_relationship'),
-                      get_string('uniformdistribute', 'local_relationship'),
+                      get_string('uniformdistribute', 'local_relationship') . $OUTPUT->help_icon('uniformdistribute', 'local_relationship'),
                       get_string('edit'));
 $table->colclasses = array('leftalign name',
                            'leftalign size',
-                           'leftalign component',
                            'centeralign uniformdistribute',
                            'leftalign name');
 
@@ -69,11 +71,43 @@ $table->attributes['class'] = 'admintable generaltable';
 $table->data = $data;
 
 echo $OUTPUT->box_start('generalbox boxaligncenter boxwidthwide');
-echo $OUTPUT->heading(get_string('relationshipgroups', 'local_relationship', format_string($relationship->name)));
 echo html_writer::table($table);
-if ($manager && empty($relationship->component)) {
-    $add = new single_button(new moodle_url('/local/relationship/edit_group.php', array('relationshipid'=>$relationshipid)), get_string('addgroup', 'local_relationship'));
-    echo html_writer::tag('div', $OUTPUT->render($add), array('class' => 'buttons'));
+if ($editable) {
+    $addgroup = new single_button(new moodle_url('/local/relationship/edit_group.php', array('relationshipid'=>$relationshipid)), get_string('addgroup', 'local_relationship'));
+
+    $sql = "SELECT rc.id, rc.roleid, count(*) AS count
+              FROM relationship_cohorts rc
+              JOIN cohort ch ON (ch.id = rc.cohortid)
+              JOIN cohort_members cm ON (cm.cohortid = ch.id)
+         LEFT JOIN relationship_members rm ON (rm.relationshipcohortid = rc.id AND rm.userid = cm.userid)
+             WHERE rc.relationshipid = :relationshipid
+               AND rc.uniformdistribution = 1
+               AND ISNULL(rm.userid)
+          GROUP BY rc.id, rc.roleid";
+    $rcs = $DB->get_records_sql($sql, array('relationshipid'=>$relationshipid));
+    if(!empty($rcs)) {
+        echo $OUTPUT->box_start('generalbox boxaligncenter boxwidthnarrow');
+        echo $OUTPUT->heading(get_string('remaining', 'local_relationship'));
+
+        $rdata = array();
+        foreach($rcs AS $rc) {
+            $role = $DB->get_record('role', array('id'=>$rc->roleid));
+            $rdata[] = array(role_get_name($role), $rc->count);
+        }
+        $rtable = new html_table();
+        $rtable->head  = array(get_string('role'),
+                               get_string('remaining', 'local_relationship'));
+        $rtable->attributes['class'] = 'generaltable';
+        $rtable->data = $rdata;
+        echo html_writer::table($rtable);
+
+        $distributeremaining = new single_button(new moodle_url('/local/relationship/edit_group.php', array('relationshipid'=>$relationshipid, 'distributeremaining'=>1)), get_string('distributeremaining', 'local_relationship'));
+        echo $OUTPUT->render($distributeremaining);
+        echo $OUTPUT->box_end();
+    }
+    echo html_writer::tag('div', $OUTPUT->render($addgroup), array('class' => 'buttons'));
+} else if($manager) {
+    echo $OUTPUT->heading(get_string('noeditable', 'local_relationship'));
 }
 echo $OUTPUT->box_end();
 

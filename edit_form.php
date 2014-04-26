@@ -22,8 +22,6 @@ class relationship_edit_form extends moodleform {
         $mform->addElement('tags', 'tags', get_string('tags'), array('display' => 'noofficial'));
         $mform->setType('tags', PARAM_TEXT);
 
-        $mform->addElement('selectyesno', 'enabled', get_string('enabled', 'local_relationship'));
-
         $mform->addElement('hidden', 'id');
         $mform->setType('id', PARAM_INT);
         $mform->addElement('hidden', 'contextid');
@@ -39,16 +37,21 @@ class relationship_edit_form extends moodleform {
 
         $errors = parent::validation($data, $files);
 
-        $params = array('name'=>addslashes($data['name']), 'contextid'=>$data['contextid']);
-        if($data['id']){
-            $where = "id != :id AND";
-            $params['id'] = $data['id'];
+        $name = trim($data['name']);
+        if(empty($name)) {
+            $errors['name'] = get_string('no_name', 'local_relationship');
         } else {
-            $where = '';
-        }
-        $sql = "SELECT id FROM {relationship} WHERE {$where} name = :name AND contextid = :contextid";
-        if($DB->record_exists_sql($sql, $params)){
-            $errors['name'] = get_string('relationship_already_exists', 'local_relationship');
+            $params = array('name'=>addslashes($name), 'contextid'=>$data['contextid']);
+            if($data['id']){
+                $where = "id != :id AND";
+                $params['id'] = $data['id'];
+            } else {
+                $where = '';
+            }
+            $sql = "SELECT id FROM {relationship} WHERE {$where} name = :name AND contextid = :contextid";
+            if($DB->record_exists_sql($sql, $params)){
+                $errors['name'] = get_string('relationship_already_exists', 'local_relationship');
+            }
         }
 
         return $errors;

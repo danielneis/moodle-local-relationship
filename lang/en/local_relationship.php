@@ -5,15 +5,20 @@ $string['allocated'] = ' (já alocado em outro grupo)';
 $string['notallocated'] = ' (ainda não alocado)';
 $string['viewreport'] = 'Vizualizar';
 
-$string['relationshipsin'] = 'Relacionamentos: {$a}';
-
 $string['enabled'] = 'Ativado';
+$string['enable'] = 'ativar';
+$string['disable'] = 'desativar';
 $string['saved'] = 'Dados foram salvos';
 
 $string['cohorts'] = 'Papeis e coortes';
 $string['groups'] = 'Grupos';
 
+$string['autogroup'] = 'Criar grupos automaticamente';
+$string['numbergroups'] = 'Número de grupos';
+
 $string['allowdupsingroups'] = 'Inscrição em vários grupos';
+$string['allowdupsingroups_help'] = 'Quando habilitada, esta opção indica que um membro do coorte pode ser inscrito
+    em mais de um dos grupos definidos neste relacionamento. Caso contrário um membro só poderá ser inscrito em um dos grupos.';
 $string['rolescohortsfull'] = 'Papeis e coortes para o relacionamento: \'{$a}\'';
 $string['noeditable'] = 'Este relacionamento não pode ser alterado pois ou está ativado ou é de origem externa';
 
@@ -21,9 +26,8 @@ $string['search'] = 'Buscar';
 $string['searchrelationship'] = 'Buscar relacionamentos: ';
 
 $string['uniformdistribute'] = 'Distribuição uniforme';
-$string['uniformdistribution'] = 'Distribuição uniforme nos grupos';
-$string['enable_uniformdistribution'] = 'Abilitar distribuição uniforme';
-$string['disable_uniformdistribution'] = 'Desabilitar destribuição uniforme';
+$string['uniformdistribute_help'] = 'Quando habilitada, esta opção indica que membros de coorte habilitado devem ser
+    uniforme e automaticamente distribuídos entre os grupos deste relacionamento que igualmente tenham sido habilitados.';
 
 $string['cantedit'] = 'Este relacionamento não pode ser manualmente alterado';
 
@@ -32,6 +36,8 @@ $string['tochangegroups'] = 'Para mudar grupos de relacionamentos \'{$a}\' é ne
 $string['groups_unchangeable'] = 'Os grupos não podem ser alterados porque a distribuição uniforme está ativa para este relacionamento';
 
 $string['addgroup'] = 'Adicionar novo grupo';
+$string['remaining'] = 'Remanescentes';
+$string['distributeremaining'] = 'Distribuir remanescentes';
 $string['editgroup'] = 'Editar grupo: \'{$a}\'';
 $string['deletegroup'] = 'Remover grupo: \'{$a}\'';
 
@@ -78,6 +84,7 @@ $string['external'] = 'Relacionamento externo';
 $string['idnumber'] = 'ID do relacionamento';
 $string['memberscount'] = 'Membros';
 $string['name'] = 'Nome';
+$string['no_name'] = 'É necessário definir um nome para o relacionameto.';
 $string['groupname'] = 'Nome do Grupo';
 $string['groupname_pattern'] = 'Group name pattern';
 $string['nocomponent'] = 'Criado manualmente';

@@ -7,9 +7,6 @@ require($CFG->dirroot.'/local/relationship/edit_group_form.php');
 
 require_login();
 
-$confirmdelete  = optional_param('confirmdelete', 0, PARAM_BOOL);
-$uniformdistribution = optional_param('uniformdistribution', -1, PARAM_INT);
-
 $category = null;
 if ($relationshipgroupid = optional_param('relationshipgroupid', 0, PARAM_INT)) {
     $relationshipgroup = $DB->get_record('relationship_groups', array('id'=>$relationshipgroupid), '*', MUST_EXIST);
@@ -21,6 +18,7 @@ if ($relationshipgroupid = optional_param('relationshipgroupid', 0, PARAM_INT)) 
     $relationshipgroup->id             = 0;
     $relationshipgroup->relationshipid = $relationshipid;
     $relationshipgroup->name           = '';
+    $relationshipgroup->uniformdistribution = 0;
 }
 $context = context::instance_by_id($relationship->contextid, MUST_EXIST);
 
@@ -34,6 +32,17 @@ $returnurl = new moodle_url('/local/relationship/groups.php', array('relationshi
 
 if (optional_param('confirmdelete', 0, PARAM_BOOL) && confirm_sesskey() && $relationshipgroup->id) {
     relationship_delete_group($relationshipgroup);
+    redirect($returnurl);
+}
+
+$uniformdistribution = optional_param('uniformdistribution', -1, PARAM_BOOL);
+if (($uniformdistribution == 0 || $uniformdistribution == 1) && $relationshipgroup->id) {
+    $DB->set_field('relationship_groups', 'uniformdistribution', $uniformdistribution, array('id'=>$relationshipgroup->id));
+    redirect($returnurl);
+}
+
+if (optional_param('distributeremaining', 0, PARAM_BOOL) && $relationship->id) {
+    relationship_uniformly_distribute_members($relationship->id);
     redirect($returnurl);
 }
 
