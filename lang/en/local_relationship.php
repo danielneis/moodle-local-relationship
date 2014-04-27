@@ -12,9 +12,24 @@ $string['saved'] = 'Dados foram salvos';
 
 $string['cohorts'] = 'Papeis e coortes';
 $string['groups'] = 'Grupos';
+$string['list'] = 'Listar';
+$string['fromcohort'] = 'A partir do coorte ';
+$string['fromcohort_help'] = 'Os grupos são criados tendo por base o coorte selecionado.
+    Será criado um grupo para cada membro do coorte, sendo que esse usuário será automaticamente inscrito no grupo.
+    O nome do grupo é definido pelo "esquema de nomes".';
+$string['namingscheme'] = 'Esquema de nomes';
+$string['namingscheme_help'] = 'O símbolo de arroba (@) pode ser usado para criar grupos com nomes que contenham letras.
+    Por exemplo, o Grupo @ irá gerar grupos, denominados Grupo A, Grupo B, Grupo C, ...<BR>
+    O símbolo de cerquilha (#) pode ser usado para criar grupos com nomes que contenham números.
+    Por exemplo, o Grupo # irá gerar grupos, denominados Grupo 1, Grupo 2, Grupo 3, ...<BR>
+    O símbolo de percentual (%) pode ser usado para criar grupos com nomes dos membro do coorte selecionado.
+    Por exemplo, o Grupo % irá gerar grupos, denominados Grupo João Carlos, Grupo Maria Lima, ...';
 
-$string['autogroup'] = 'Criar grupos automaticamente';
+$string['autogroup'] = 'Adicionar vários grupos';
 $string['numbergroups'] = 'Número de grupos';
+$string['creategroups'] = 'Adicionar grupos';
+$string['preview'] = 'Pré-visualizar';
+$string['alreadyexists'] = ' (Já existente)';
 
 $string['allowdupsingroups'] = 'Inscrição em vários grupos';
 $string['allowdupsingroups_help'] = 'Quando habilitada, esta opção indica que um membro do coorte pode ser inscrito
@@ -50,6 +65,7 @@ $string['deletecohort'] = 'Remover papel/coorte: \'{$a}\'';
 
 $string['assign'] = 'Atribuir';
 $string['courses'] = 'Cursos';
+$string['coursesusing'] = 'Cursos que utilizam o relacionamento: \'{$a}\'';
 $string['assignto'] = 'Membros do grupo: \'{$a}\'';
 $string['backtorelationship'] = 'Voltar para o relacionamento';
 $string['backtorelationships'] = 'Voltar para relacionamentos';

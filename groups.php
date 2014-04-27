@@ -73,8 +73,6 @@ $table->data = $data;
 echo $OUTPUT->box_start('generalbox boxaligncenter boxwidthwide');
 echo html_writer::table($table);
 if ($editable) {
-    $addgroup = new single_button(new moodle_url('/local/relationship/edit_group.php', array('relationshipid'=>$relationshipid)), get_string('addgroup', 'local_relationship'));
-
     $sql = "SELECT rc.id, rc.roleid, count(*) AS count
               FROM relationship_cohorts rc
               JOIN cohort ch ON (ch.id = rc.cohortid)
@@ -105,7 +103,10 @@ if ($editable) {
         echo $OUTPUT->render($distributeremaining);
         echo $OUTPUT->box_end();
     }
-    echo html_writer::tag('div', $OUTPUT->render($addgroup), array('class' => 'buttons'));
+
+    $addgroup = new single_button(new moodle_url('/local/relationship/edit_group.php', array('relationshipid'=>$relationshipid)), get_string('addgroup', 'local_relationship'));
+    $addgroups = new single_button(new moodle_url('/local/relationship/autogroup.php', array('relationshipid'=>$relationshipid)), get_string('autogroup', 'local_relationship'));
+    echo html_writer::tag('div', $OUTPUT->render($addgroup) . $OUTPUT->render($addgroups), array('class' => 'buttons'));
 } else if($manager) {
     echo $OUTPUT->heading(get_string('noeditable', 'local_relationship'));
 }

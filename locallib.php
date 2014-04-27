@@ -41,6 +41,21 @@ function relationship_set_title($relationship=null, $action=null, $param=null) {
     }
 }
 
+function relationship_groups_parse_name($format, $value) {
+    if (strstr($format, '@') !== false) { // Convert $value to a character series
+        $letter = 'A';
+        for($i=0; $i<$value; $i++) {
+            $letter++;
+        }
+        $str = str_replace('@', $letter, $format);
+    } else if (strstr($format, '#') !== false) { // Convert $value to a number series
+        $str = str_replace('#', $value+1, $format);
+    } else { // replace $value 
+        $str = str_replace('%', $value, $format);
+    }
+    return($str);
+}
+
 function relationship_get_role_options() {
     $all_roles = role_get_names();
     $ctx_roles = get_roles_for_contextlevels(CONTEXT_COURSE) + get_roles_for_contextlevels(CONTEXT_COURSECAT);
@@ -125,12 +140,29 @@ function relationship_get_groups($relationshipid) {
 function relationship_get_courses($relationshipid) {
     global $DB;
 
-    $sql = "SELECT DISTINCT c.id, c.fullname
+    $sql = "SELECT DISTINCT c.id, c.shortname, c.fullname
               FROM {enrol} e
               JOIN {course} c ON (c.id = e.courseid)
              WHERE e.enrol = 'relationship'
                AND e.customint1 = :relationshipid
           ORDER BY c.fullname";
+    return $DB->get_records_sql($sql, array('relationshipid'=>$relationshipid));
+}
+
+function relationship_is_in_use($relationshipid) {
+    global $DB;
+
+    return $DB->record_exists('enrol', array('enrol'=>'relationship', 'customint1'=>$relationshipid));
+}
+
+function relationship_courses_where_is_in_use($relationshipid) {
+    global $DB;
+
+    $sql = "SELECT DISTINCT c.id, c.shortname, c.fullname
+              FROM {enrol} e
+              JOIN {course} c ON (c.id = e.courseid)
+             WHERE e.enrol = 'relationship'
+               AND e.customint1 = :relationshipid";
     return $DB->get_records_sql($sql, array('relationshipid'=>$relationshipid));
 }
 

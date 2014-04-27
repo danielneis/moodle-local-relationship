@@ -70,7 +70,7 @@
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
       </KEYS>
       <INDEXES>
-        <INDEX NAME="relmemb_reluse_uix" UNIQUE="true" FIELDS="relationshipgroupid, userid"/>
+        <INDEX NAME="relmemb_reluse_uix" UNIQUE="true" FIELDS="relationshipgroupid, relationshipcohortid, userid"/>
         <INDEX NAME="relmemb_use_ix" UNIQUE="false" FIELDS="userid"/>
       </INDEXES>
     </TABLE>

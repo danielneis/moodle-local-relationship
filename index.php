@@ -21,6 +21,19 @@ relationship_set_title();
 
 $manager = has_capability('local/relationship:manage', $context);
 
+if($relationshipid = optional_param('relationshipid', 0, PARAM_INT)) {
+    $relationship = relationship_get_relationship($relationshipid);
+    echo $OUTPUT->box_start('generalbox boxaligncenter boxwidthwide');
+    echo $OUTPUT->heading(get_string('coursesusing', 'local_relationship', $relationship->name), 3, 'main');
+    echo html_writer::start_tag('OL');
+    foreach(relationship_get_courses($relationshipid) AS $c) {
+        $link = html_writer::link(new moodle_url('/enrol/instances.php', array('id'=>$c->id)), $c->fullname, array('target'=>'_new'));
+        echo html_writer::tag('LI', $link);
+    }
+    echo html_writer::end_tag('OL');
+    echo $OUTPUT->box_end();
+}
+
 $relationships = relationship_search_relationships($contextid, $page, 25, $searchquery);
 $count = '';
 if ($relationships['allrelationships'] > 0) {
@@ -55,14 +68,23 @@ foreach($relationships['relationships'] as $relationship) {
               JOIN relationship_members rm ON (rm.relationshipgroupid = rg.id)
              WHERE rg.relationshipid = :relationshipid";
     $line[] = $DB->count_records_sql($sql, array('relationshipid'=>$relationship->id));
-    $line[] = implode(', ', $relationship->tags);
 
+    $course_count = $DB->count_records('enrol', array('enrol'=>'relationship', 'customint1'=>$relationship->id));
+    if($course_count > 0) {
+        $url = new moodle_url('/local/relationship/index.php', array('contextid'=>$contextid, 'relationshipid'=>$relationship->id));
+        $link = html_writer::link($url, get_string('list', 'local_relationship'));
+        $line[] = $course_count . ' (' . $link . ')';
+    } else {
+        $line[] = $course_count;
+    }
+
+    $line[] = implode(', ', $relationship->tags);
     $line[] = empty($relationship->component) ? get_string('nocomponent', 'local_relationship') : get_string('pluginname', $relationship->component);
 
     $buttons = array();
     if (empty($relationship->component)) {
         if ($manager) {
-            if(!$DB->record_exists('enrol', array('enrol'=>'relationship', 'customint1'=>$relationship->id))) {
+            if($course_count == 0) {
                 $buttons[] = html_writer::link(new moodle_url('/local/relationship/edit.php', array('relationshipid'=>$relationship->id, 'delete'=>1)),
                     html_writer::empty_tag('img', array('src'=>$OUTPUT->pix_url('t/delete'), 'alt'=>get_string('delete'), 'title'=>get_string('delete'), 'class'=>'iconsmall')));
             }
@@ -85,10 +107,11 @@ echo $OUTPUT->heading(get_string('relationships', 'local_relationship', $count),
 $table = new html_table();
 $table->head  = array(get_string('name', 'local_relationship'),
                       get_string('memberscount', 'local_relationship'),
+                      get_string('courses'),
                       get_string('tags', 'tag'),
                       get_string('component', 'local_relationship'),
                       get_string('edit'));
-$table->colclasses = array('leftalign name', 'leftalign description', 'leftalign size', 'centeralign source', 'centeralign action');
+$table->colclasses = array('leftalign name', 'leftalign description', 'leftalign size', 'centeralign', 'centeralign source', 'centeralign action');
 $table->id = 'relationships';
 $table->attributes['class'] = 'admintable generaltable';
 $table->data  = $data;
