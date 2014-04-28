@@ -39,6 +39,7 @@
       </KEYS>
       <INDEXES>
         <INDEX NAME="relchr_rel_ix" UNIQUE="false" FIELDS="relationshipid"/>
+        <INDEX NAME="relchr_coh_ix" UNIQUE="false" FIELDS="cohortid"/>
       </INDEXES>
     </TABLE>
     <TABLE NAME="relationship_groups" COMMENT="each record represents one group within a relationship">
@@ -46,7 +47,6 @@
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="relationshipid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="name" TYPE="char" LENGTH="100" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="idnumber" TYPE="char" LENGTH="100" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="uniformdistribution" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
@@ -71,6 +71,7 @@
       </KEYS>
       <INDEXES>
         <INDEX NAME="relmemb_reluse_uix" UNIQUE="true" FIELDS="relationshipgroupid, relationshipcohortid, userid"/>
+        <INDEX NAME="relmemb_coh_ix" UNIQUE="false" FIELDS="relationshipcohortid"/>
         <INDEX NAME="relmemb_use_ix" UNIQUE="false" FIELDS="userid"/>
       </INDEXES>
     </TABLE>

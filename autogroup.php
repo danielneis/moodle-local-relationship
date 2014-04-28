@@ -92,7 +92,6 @@ if ($editform->is_cancelled()) {
                 $newgroup = new stdClass();
                 $newgroup->relationshipid = $relationshipid;
                 $newgroup->name = $group['name'];
-                $newgroup->idnumber = '';
                 $newgroup->uniformdistribution = 0;
                 $id = relationship_add_group($newgroup);
 

@@ -22,7 +22,7 @@ $string['namingscheme_help'] = 'O símbolo de arroba (@) pode ser usado para cri
     Por exemplo, o Grupo @ irá gerar grupos, denominados Grupo A, Grupo B, Grupo C, ...<BR>
     O símbolo de cerquilha (#) pode ser usado para criar grupos com nomes que contenham números.
     Por exemplo, o Grupo # irá gerar grupos, denominados Grupo 1, Grupo 2, Grupo 3, ...<BR>
-    O símbolo de percentual (%) pode ser usado para criar grupos com nomes dos membro do coorte selecionado.
+    O símbolo de percentual (%) pode ser usado para criar grupos com nomes dos membros do coorte selecionado.
     Por exemplo, o Grupo % irá gerar grupos, denominados Grupo João Carlos, Grupo Maria Lima, ...';
 
 $string['autogroup'] = 'Adicionar vários grupos';
