@@ -18,8 +18,11 @@ class relationshipgroup_edit_form extends moodleform {
         $mform->addRule('name', get_string('required'), 'required', null, 'client');
         $mform->setType('name', PARAM_NOTAGS);
 
-//        $mform->addElement('selectyesno', 'uniformdistribution', get_string('uniformdistribute', 'local_relationship'));
-//        $mform->addHelpButton('uniformdistribution', 'uniformdistribute', 'local_relationship');
+        $mform->addElement('text', 'userlimit', get_string('userlimit', 'local_relationship'),'maxlength="5" size="4"');
+        $mform->setType('userlimit', PARAM_INT);
+        $mform->addRule('userlimit', null, 'numeric', null, 'client');
+        $mform->setDefault('userlimit', 0);
+        $mform->addHelpButton('userlimit', 'userlimit', 'local_relationship');
 
         $mform->addElement('hidden', 'id');
         $mform->setType('id', PARAM_INT);

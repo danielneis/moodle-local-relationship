@@ -41,17 +41,23 @@ function relationship_set_title($relationship=null, $action=null, $param=null) {
     }
 }
 
-function relationship_groups_parse_name($format, $value) {
-    if (strstr($format, '@') !== false) { // Convert $value to a character series
-        $letter = 'A';
-        for($i=0; $i<$value; $i++) {
-            $letter++;
+function relationship_groups_parse_name($format, $value, $value_is_a_name=false) {
+    if($value_is_a_name) {
+        if (strstr($format, '@') !== false) {
+            $str = str_replace('@', $value, $format);
+        } else {
+            $str = str_replace('#', $value, $format);
         }
-        $str = str_replace('@', $letter, $format);
-    } else if (strstr($format, '#') !== false) { // Convert $value to a number series
-        $str = str_replace('#', $value+1, $format);
-    } else { // replace $value 
-        $str = str_replace('%', $value, $format);
+    } else {
+        if (strstr($format, '@') !== false) { // Convert $value to a character series
+            $letter = 'A';
+            for($i=0; $i<$value; $i++) {
+                $letter++;
+            }
+            $str = str_replace('@', $letter, $format);
+        } else { // Convert $value to a number series
+            $str = str_replace('#', $value+1, $format);
+        }
     }
     return($str);
 }
@@ -490,7 +496,7 @@ function relationship_uniformly_distribute_users($relationshipcohort, $userids) 
         return;
     }
 
-    $sql = "SELECT rg.id, count(DISTINCT rm.userid) as count
+    $sql = "SELECT rg.id, rg.userlimit, count(DISTINCT rm.userid) as count
               FROM {relationship_cohorts} rc
               JOIN {relationship_groups} rg ON (rg.relationshipid = rc.relationshipid AND rg.uniformdistribution = 1)
          LEFT JOIN {relationship_members} rm ON (rm.relationshipgroupid = rg.id AND rm.relationshipcohortid = rc.id)
@@ -502,13 +508,17 @@ function relationship_uniformly_distribute_users($relationshipcohort, $userids) 
             $min = 99999999;
             $gmin = 0;
             foreach($groups AS $grpid=>$grp) {
-                if($grp->count < $min) {
+                if($grp->count < $min && $grp->count < $grp->userlimit) {
                     $min = $grp->count;
                     $gmin = $grpid;
                 }
             }
-            relationship_add_member($gmin, $relationshipcohort->id, $userid);
-            $groups[$gmin]->count++;
+            if($gmin == 0) {
+                break; // there is no group to add member
+            } else {
+                relationship_add_member($gmin, $relationshipcohort->id, $userid);
+                $groups[$gmin]->count++;
+            }
         }
     }
 }

@@ -19,11 +19,16 @@ $string['fromcohort_help'] = 'Os grupos são criados tendo por base o coorte sel
     O nome do grupo é definido pelo "esquema de nomes".';
 $string['namingscheme'] = 'Esquema de nomes';
 $string['namingscheme_help'] = 'O símbolo de arroba (@) pode ser usado para criar grupos com nomes que contenham letras.
-    Por exemplo, o Grupo @ irá gerar grupos, denominados Grupo A, Grupo B, Grupo C, ...<BR>
+    Por exemplo, "Grupo @" irá gerar grupos, denominados "Grupo A", "Grupo B", "Grupo C", ...<BR>
     O símbolo de cerquilha (#) pode ser usado para criar grupos com nomes que contenham números.
-    Por exemplo, o Grupo # irá gerar grupos, denominados Grupo 1, Grupo 2, Grupo 3, ...<BR>
-    O símbolo de percentual (%) pode ser usado para criar grupos com nomes dos membros do coorte selecionado.
-    Por exemplo, o Grupo % irá gerar grupos, denominados Grupo João Carlos, Grupo Maria Lima, ...';
+    Por exemplo, "Grupo #" irá gerar grupos, denominados "Grupo 1", "Grupo 2", "Grupo 3", ...<BR>
+    No caso de ser selecionado um coorte, os símbolos arroba (@) e cerquilha (#) podem ser usados para criar grupos com nomes dos membros deste coorte.
+    Por exemplo, "Grupo @" irá gerar grupos, denominados "Grupo João Carlos", "Grupo Maria Lima", ...';
+$string['limit'] = 'Limite p/papel';
+$string['userlimit'] = 'Limite de usuários por papel';
+$string['userlimit_help'] = 'Número máximo de usuários permitidos no grupo em cada papel.<br>Este valor só é verificado nos casos
+    em que a inscrição é automática em função de algum critério.
+    <br>O valor 0 (zero) indica que não há limite para inscrições.';
 
 $string['autogroup'] = 'Adicionar vários grupos';
 $string['numbergroups'] = 'Número de grupos';
@@ -35,7 +40,7 @@ $string['allowdupsingroups'] = 'Inscrição em vários grupos';
 $string['allowdupsingroups_help'] = 'Quando habilitada, esta opção indica que um membro do coorte pode ser inscrito
     em mais de um dos grupos definidos neste relacionamento. Caso contrário um membro só poderá ser inscrito em um dos grupos.';
 $string['rolescohortsfull'] = 'Papeis e coortes para o relacionamento: \'{$a}\'';
-$string['noeditable'] = 'Este relacionamento não pode ser alterado pois ou está ativado ou é de origem externa';
+$string['noeditable'] = 'Este relacionamento não pode ser alterado pois é de origem externa';
 
 $string['search'] = 'Buscar';
 $string['searchrelationship'] = 'Buscar relacionamentos: ';

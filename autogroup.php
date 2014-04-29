@@ -34,6 +34,7 @@ if ($editform->is_cancelled()) {
     redirect($returnurl);
 } elseif ($data = $editform->get_data()) {
     $numgrps  = $data->number;
+    $userlimit = $data->userlimit;
     $relationshipcohortid = $data->relationshipcohortid;
 
     $existing_groups = $DB->get_records_menu('relationship_groups', array('relationshipid'=>$relationshipid), null, 'name, id');
@@ -50,7 +51,7 @@ if ($editform->is_cancelled()) {
         $members = $DB->get_records_sql($sql, array('relationshipcohortid'=>$relationshipcohortid));
         $i = 0;
         foreach($members as $m) {
-            $new_groups[$i]['name']   = relationship_groups_parse_name(trim($data->namingscheme), "{$m->firstname} {$m->lastname}");
+            $new_groups[$i]['name']   = relationship_groups_parse_name(trim($data->namingscheme), "{$m->firstname} {$m->lastname}", true);
             $new_groups[$i]['userid'] = $m->userid;
             $new_groups[$i]['exists'] = isset($existing_groups[$new_groups[$i]['name']]);
             $i++;
@@ -93,6 +94,7 @@ if ($editform->is_cancelled()) {
                 $newgroup->relationshipid = $relationshipid;
                 $newgroup->name = $group['name'];
                 $newgroup->uniformdistribution = 0;
+                $newgroup->userlimit = $userlimit;
                 $id = relationship_add_group($newgroup);
 
                 if($group['userid']) {

@@ -28,10 +28,17 @@ class autogroup_form extends moodleform {
         $mform->setType('namingscheme', PARAM_TEXT);
         $mform->setDefault('namingscheme', get_string('grouptemplate', 'group'));
 
+        $mform->addElement('text', 'userlimit', get_string('userlimit', 'local_relationship'),'maxlength="5" size="4"');
+        $mform->setType('userlimit', PARAM_INT);
+        $mform->addRule('userlimit', null, 'numeric', null, 'client');
+        $mform->setDefault('userlimit', 0);
+        $mform->addHelpButton('userlimit', 'userlimit', 'local_relationship');
+
         $mform->addElement('text', 'number', get_string('numbergroups', 'local_relationship'),'maxlength="4" size="4"');
         $mform->setType('number', PARAM_INT);
         $mform->addRule('number', null, 'numeric', null, 'client');
         $mform->setDefault('number', 0);
+        $mform->disabledIf('number', 'relationshipcohortid', 'gt', 0);
 
         $sql = "SELECT rc.id, rc.cohortid, rc.roleid, ch.name
                   FROM {relationship_cohorts} rc
@@ -50,6 +57,7 @@ class autogroup_form extends moodleform {
             $mform->addElement('select', 'relationshipcohortid', get_string('fromcohort', 'local_relationship'), $options);
             $mform->setDefault('relationshipcohortid', '0');
             $mform->addHelpButton('relationshipcohortid', 'fromcohort', 'local_relationship');
+            $mform->disabledIf('relationshipcohortid', 'number', 'gt', 0);
         } else {
             $mform->addElement('hidden','relationshipcohortid');
             $mform->setType('relationshipcohortid', PARAM_INT);

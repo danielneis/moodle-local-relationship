@@ -28,6 +28,7 @@ foreach($relationshipgroups as $relationshipgroup) {
 
     $line[] = format_string($relationshipgroup->name);
     $line[] = $relationshipgroup->size;
+    $line[] = $relationshipgroup->userlimit;
 
     if($relationshipgroup->uniformdistribution) {
         $status = get_string('yes');
@@ -38,8 +39,12 @@ foreach($relationshipgroups as $relationshipgroup) {
         $uniformdistribution = 1;
         $text = get_string('enable', 'local_relationship');
     }
-    $url = new moodle_url('/local/relationship/edit_group.php', array('relationshipgroupid'=>$relationshipgroup->id, 'uniformdistribution'=>$uniformdistribution));
-    $line[] = $status . ' (' .  html_writer::link($url, $text) . ')';
+    if($editable) {
+        $url = new moodle_url('/local/relationship/edit_group.php', array('relationshipgroupid'=>$relationshipgroup->id, 'uniformdistribution'=>$uniformdistribution));
+        $line[] = $status . ' (' .  html_writer::link($url, $text) . ')';
+    } else {
+        $line[] = $status;
+    }
 
     $buttons = array();
     if ($editable) {
@@ -59,6 +64,7 @@ foreach($relationshipgroups as $relationshipgroup) {
 $table = new html_table();
 $table->head  = array(get_string('name', 'local_relationship'),
                       get_string('memberscount', 'local_relationship'),
+                      get_string('limit', 'local_relationship'),
                       get_string('uniformdistribute', 'local_relationship') . $OUTPUT->help_icon('uniformdistribute', 'local_relationship'),
                       get_string('edit'));
 $table->colclasses = array('leftalign name',
