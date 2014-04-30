@@ -508,7 +508,7 @@ function relationship_uniformly_distribute_users($relationshipcohort, $userids) 
             $min = 99999999;
             $gmin = 0;
             foreach($groups AS $grpid=>$grp) {
-                if($grp->count < $min && $grp->count < $grp->userlimit) {
+                if($grp->count < $min && ($grp->userlimit == 0 || $grp->count < $grp->userlimit)) {
                     $min = $grp->count;
                     $gmin = $grpid;
                 }
