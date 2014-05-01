@@ -59,13 +59,21 @@ $table->data = $data;
 
 echo $OUTPUT->box_start('generalbox boxaligncenter boxwidthwide');
 echo html_writer::table($table);
-$text_add = '';
+
 if ($editable) {
-    $add = new single_button(new moodle_url('/local/relationship/edit_cohort.php',
-                    array('relationshipid'=>$relationshipid)), get_string('add'));
-    echo $OUTPUT->render($add);
+    $cohorts = relationship_get_cohort_options($relationshipid);
+    foreach($relationshipcohorts AS $rc) {
+        unset($cohorts[$rc->cohortid]);
+    }
+    if(empty($cohorts)) {
+        echo $OUTPUT->heading(get_string('nocohorts', 'local_relationship'), 4);
+    } else {
+        $add = new single_button(new moodle_url('/local/relationship/edit_cohort.php',
+                        array('relationshipid'=>$relationshipid)), get_string('add'));
+        echo $OUTPUT->render($add);
+    }
 } else if($manager) {
-    echo $OUTPUT->heading(get_string('noeditable', 'local_relationship'));
+    echo $OUTPUT->heading(get_string('noeditable', 'local_relationship', 4));
 }
 echo $OUTPUT->box_end();
 

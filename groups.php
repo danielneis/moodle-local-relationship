@@ -64,7 +64,7 @@ foreach($relationshipgroups as $relationshipgroup) {
 $table = new html_table();
 $table->head  = array(get_string('name', 'local_relationship'),
                       get_string('memberscount', 'local_relationship'),
-                      get_string('limit', 'local_relationship'),
+                      get_string('limit', 'local_relationship') . $OUTPUT->help_icon('userlimit', 'local_relationship'),
                       get_string('uniformdistribute', 'local_relationship') . $OUTPUT->help_icon('uniformdistribute', 'local_relationship'),
                       get_string('edit'));
 $table->colclasses = array('leftalign name',

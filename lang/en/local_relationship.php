@@ -41,6 +41,7 @@ $string['allowdupsingroups_help'] = 'Quando habilitada, esta opção indica que 
     em mais de um dos grupos definidos neste relacionamento. Caso contrário um membro só poderá ser inscrito em um dos grupos.';
 $string['rolescohortsfull'] = 'Papeis e coortes para o relacionamento: \'{$a}\'';
 $string['noeditable'] = 'Este relacionamento não pode ser alterado pois é de origem externa';
+$string['nocohorts'] = 'Não há coortes disponíveis para adição neste relacionamento.';
 
 $string['search'] = 'Buscar';
 $string['searchrelationship'] = 'Buscar relacionamentos: ';

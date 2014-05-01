@@ -71,6 +71,7 @@ function relationship_get_role_options() {
             $roles[$roleid] = $all_roles[$roleid]->localname;
         }
     }
+    asort($roles);
     return $roles;
 }
 
