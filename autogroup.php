@@ -38,7 +38,7 @@ if ($editform->is_cancelled()) {
     $relationshipcohortid = $data->relationshipcohortid;
 
     $existing_groups = $DB->get_records_menu('relationship_groups', array('relationshipid'=>$relationshipid), null, 'name, id');
-    $course_groups = relationship_get_group_names($relationshipid);
+    $course_groups = relationship_get_other_courses_group_names($relationshipid);
 
     // Plan the allocation
     $new_groups = array();

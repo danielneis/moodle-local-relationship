@@ -156,7 +156,8 @@ function relationship_get_courses($relationshipid) {
     return $DB->get_records_sql($sql, array('relationshipid'=>$relationshipid));
 }
 
-function relationship_get_group_names($relationshipid) {
+// Nomes de outros grupos que não os do próprio relacionamento
+function relationship_get_other_courses_group_names($relationshipid) {
     global $DB;
 
     $sql = "SELECT DISTINCT g.name, e.courseid, c.fullname
@@ -165,6 +166,7 @@ function relationship_get_group_names($relationshipid) {
               JOIN {groups} g ON (g.courseid = e.courseid)
              WHERE e.enrol = 'relationship'
                AND e.customint1 = :relationshipid
+               AND g.idnumber NOT LIKE 'relationship_{$relationshipid}_%'
           ORDER BY g.name";
     $groups = array();
     foreach($DB->get_records_sql($sql, array('relationshipid'=>$relationshipid)) as $r) {

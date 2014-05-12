@@ -44,7 +44,7 @@ class relationshipgroup_edit_form extends moodleform {
                     array('relationshipid'=>$data['relationshipid'], 'name'=>$data['name'], 'id'=>$data['id']))){
             $errors['name'] = get_string('group_already_exists', 'local_relationship');
         } else {
-            $groups = relationship_get_group_names($data['relationshipid']);
+            $groups = relationship_get_other_courses_group_names($data['relationshipid']);
             if(isset($groups[$data['name']])) {
                 $c = reset($groups[$data['name']]);
                 $errors['name'] = get_string('course_group_already_exists', 'local_relationship', $c->fullname);
