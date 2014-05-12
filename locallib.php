@@ -665,6 +665,14 @@ class relationship_candidate_selector extends user_selector_base {
         }
         return $users;
     }
+
+    protected function get_options() {
+        $options = parent::get_options();
+        $options['relationshipgroup'] = $this->relationshipgroup;
+        $options['file'] = 'local/relationship/locallib.php';
+        return $options;
+    }
+
 }
 
 
@@ -722,6 +730,13 @@ class relationship_existing_selector extends user_selector_base {
             }
         }
         return $users;
+    }
+
+    protected function get_options() {
+        $options = parent::get_options();
+        $options['relationshipgroup'] = $this->relationshipgroup;
+        $options['file'] = 'local/relationship/locallib.php';
+        return $options;
     }
 }
 
