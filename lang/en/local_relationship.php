@@ -35,6 +35,7 @@ $string['numbergroups'] = 'Número de grupos';
 $string['creategroups'] = 'Adicionar grupos';
 $string['preview'] = 'Pré-visualizar';
 $string['alreadyexists'] = ' (Já existente)';
+$string['alreadyexistsexternal'] = ' (Já existente em algum dos cursos que utilizam este relacionamento)';
 
 $string['allowdupsingroups'] = 'Inscrição em vários grupos';
 $string['allowdupsingroups_help'] = 'Quando habilitada, esta opção indica que um membro do coorte pode ser inscrito
@@ -129,4 +130,5 @@ $string['tagname'] = 'Nome da etiqueta:';
 $string['no_delete_tag'] = 'Não é permitido remover etiquetas criadas por outros módulos.';
 $string['tag_already_exists'] = 'Esta etiqueta já existe. Entre com outro nome para a etiqueta!';
 $string['group_already_exists'] = 'Este grupo já existe. Entre com outro nome para o grupo!';
+$string['course_group_already_exists'] = 'já há grupo com mesmo nome no curso: \'{$a}\'. É necessário renomear ou remover esse grupo.';
 $string['relationship_already_exists'] = 'Já existe relacionamento com este nome neste contexto. Ofereça outro nome para o relacionamento.';

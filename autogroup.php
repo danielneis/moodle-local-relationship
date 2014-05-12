@@ -38,6 +38,7 @@ if ($editform->is_cancelled()) {
     $relationshipcohortid = $data->relationshipcohortid;
 
     $existing_groups = $DB->get_records_menu('relationship_groups', array('relationshipid'=>$relationshipid), null, 'name, id');
+    $course_groups = relationship_get_group_names($relationshipid);
 
     // Plan the allocation
     $new_groups = array();
@@ -54,6 +55,7 @@ if ($editform->is_cancelled()) {
             $new_groups[$i]['name']   = relationship_groups_parse_name(trim($data->namingscheme), "{$m->firstname} {$m->lastname}", true);
             $new_groups[$i]['userid'] = $m->userid;
             $new_groups[$i]['exists'] = isset($existing_groups[$new_groups[$i]['name']]);
+            $new_groups[$i]['exists_external'] = isset($course_groups[$new_groups[$i]['name']]);
             $i++;
         }
     } else {
@@ -64,7 +66,8 @@ if ($editform->is_cancelled()) {
             $new_groups[$i]['name']   = relationship_groups_parse_name(trim($data->namingscheme), $i);
             $new_groups[$i]['userid'] = 0;
             $new_groups[$i]['exists'] = isset($existing_groups[$new_groups[$i]['name']]);
-            if(!$new_groups[$i]['exists']) {
+            $new_groups[$i]['exists_external'] = isset($course_groups[$new_groups[$i]['name']]);
+            if(!$new_groups[$i]['exists'] && !$new_groups[$i]['exists_external']) {
                 $count--;
             }
             $i++;
@@ -81,6 +84,8 @@ if ($editform->is_cancelled()) {
         foreach ($new_groups as $group) {
             if($group['exists']) {
                 $text = html_writer::tag('span', $group['name'], array('style'=>'color:red; font-weight: bold;')) . get_string('alreadyexists', 'local_relationship');
+            } else if($group['exists_external']) {
+                    $text = html_writer::tag('span', $group['name'], array('style'=>'color:red; font-weight: bold;')) . get_string('alreadyexistsexternal', 'local_relationship');
             } else {
                 $text = $group['name'];
             }

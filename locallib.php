@@ -64,7 +64,7 @@ function relationship_groups_parse_name($format, $value, $value_is_a_name=false)
 
 function relationship_get_role_options() {
     $all_roles = role_get_names();
-    $ctx_roles = get_roles_for_contextlevels(CONTEXT_COURSE) + get_roles_for_contextlevels(CONTEXT_COURSECAT);
+    $ctx_roles = get_roles_for_contextlevels(CONTEXT_COURSE);
     $roles = array();
     foreach($ctx_roles AS $id=>$roleid) {
         if($roleid > 2) {
@@ -154,6 +154,23 @@ function relationship_get_courses($relationshipid) {
                AND e.customint1 = :relationshipid
           ORDER BY c.fullname";
     return $DB->get_records_sql($sql, array('relationshipid'=>$relationshipid));
+}
+
+function relationship_get_group_names($relationshipid) {
+    global $DB;
+
+    $sql = "SELECT DISTINCT g.name, e.courseid, c.fullname
+              FROM {enrol} e
+              JOIN {course} c ON (c.id = e.courseid)
+              JOIN {groups} g ON (g.courseid = e.courseid)
+             WHERE e.enrol = 'relationship'
+               AND e.customint1 = :relationshipid
+          ORDER BY g.name";
+    $groups = array();
+    foreach($DB->get_records_sql($sql, array('relationshipid'=>$relationshipid)) as $r) {
+        $groups[$r->name][] = $r;
+    }
+    return $groups;
 }
 
 function relationship_is_in_use($relationshipid) {

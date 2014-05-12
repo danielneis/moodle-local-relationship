@@ -38,11 +38,19 @@ class relationshipgroup_edit_form extends moodleform {
         global $DB;
 
         $errors = parent::validation($data, $files);
+
         if($DB->record_exists_select('relationship_groups',
-                                     "relationshipid = :relationshipid AND name = :name AND id != :id",
-                                     array('relationshipid'=>$data['relationshipid'], 'name'=>$data['name'], 'id'=>$data['id']))){
-               $errors['name'] = get_string('group_already_exists', 'local_relationship');
+                    "relationshipid = :relationshipid AND name = :name AND id != :id",
+                    array('relationshipid'=>$data['relationshipid'], 'name'=>$data['name'], 'id'=>$data['id']))){
+            $errors['name'] = get_string('group_already_exists', 'local_relationship');
+        } else {
+            $groups = relationship_get_group_names($data['relationshipid']);
+            if(isset($groups[$data['name']])) {
+                $c = reset($groups[$data['name']]);
+                $errors['name'] = get_string('course_group_already_exists', 'local_relationship', $c->fullname);
+            }
         }
+
         return $errors;
     }
 
