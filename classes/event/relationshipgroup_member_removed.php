@@ -17,9 +17,8 @@
 /**
  * User removed from a relationship event.
  *
- * @package    local
- * @copyright  2013 Dan Poltawski <dan@moodle.com>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package local_relationship
+ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 namespace local_relationship\event;
@@ -28,12 +27,10 @@ defined('MOODLE_INTERNAL') || die();
 /**
  * User removed from a relationship event class.
  *
- * @package    local
- * @copyright  2013 Dan Poltawski <dan@moodle.com>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package local_relationship
+ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
-class relationshipgroup_member_removed extends  \core\event\base {
+class relationshipgroup_member_removed extends \core\event\base {
 
     /**
      * Init method.
