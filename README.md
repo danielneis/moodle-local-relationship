@@ -26,3 +26,8 @@ através da seleção de algumas regras pré-existentes ou manualmente.
 
 Ainda é possível definir restrições como tamanho do grupo e quantidade
 máximas de pessoas de um determinado cohort em um grupo.
+
+Eventos
+-------
+
+Este plugin utiliza a nova API de eventos, descrita em: http://docs.moodle.org/dev/Event_2
