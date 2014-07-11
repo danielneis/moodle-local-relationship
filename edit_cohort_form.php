@@ -1,7 +1,7 @@
 <?php
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->dirroot . '/lib/formslib.php');
+require_once($CFG->dirroot.'/lib/formslib.php');
 
 class relationshipcohort_edit_form extends moodleform {
 
@@ -46,8 +46,6 @@ class relationshipcohort_edit_form extends moodleform {
     }
 
     public function validation($data, $files) {
-        global $DB;
-
         $errors = parent::validation($data, $files);
         return $errors;
     }

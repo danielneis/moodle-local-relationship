@@ -2,7 +2,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->dirroot . '/lib/formslib.php');
+require_once($CFG->dirroot.'/lib/formslib.php');
 
 class relationship_edit_form extends moodleform {
 
@@ -38,18 +38,18 @@ class relationship_edit_form extends moodleform {
         $errors = parent::validation($data, $files);
 
         $name = trim($data['name']);
-        if(empty($name)) {
+        if (empty($name)) {
             $errors['name'] = get_string('no_name', 'local_relationship');
         } else {
-            $params = array('name'=>addslashes($name), 'contextid'=>$data['contextid']);
-            if($data['id']){
+            $params = array('name' => addslashes($name), 'contextid' => $data['contextid']);
+            if ($data['id']) {
                 $where = "id != :id AND";
                 $params['id'] = $data['id'];
             } else {
                 $where = '';
             }
             $sql = "SELECT id FROM {relationship} WHERE {$where} name = :name AND contextid = :contextid";
-            if($DB->record_exists_sql($sql, $params)){
+            if ($DB->record_exists_sql($sql, $params)) {
                 $errors['name'] = get_string('relationship_already_exists', 'local_relationship');
             }
         }
