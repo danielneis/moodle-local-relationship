@@ -1,9 +1,10 @@
 <?php
 
-require_once(__DIR__ . '/../../config.php');
-require_once($CFG->dirroot . '/local/relationship/locallib.php');
-require_once($CFG->dirroot . '/local/relationship/autogroup_form.php');
-require_once($CFG->dirroot . '/group/lib.php');
+require_once(__DIR__.'/../../config.php');
+require_once($CFG->dirroot.'/local/relationship/lib.php');
+require_once($CFG->dirroot.'/local/relationship/locallib.php');
+require_once($CFG->dirroot.'/local/relationship/autogroup_form.php');
+require_once($CFG->dirroot.'/group/lib.php');
 
 require_login();
 
@@ -83,9 +84,9 @@ if ($editform->is_cancelled()) {
         $table->data = array();
         foreach ($new_groups as $group) {
             if ($group['exists']) {
-                $text = html_writer::tag('span', $group['name'], array('style' => 'color:red; font-weight: bold;')) . get_string('alreadyexists', 'local_relationship');
+                $text = html_writer::tag('span', $group['name'], array('style' => 'color:red; font-weight: bold;')).get_string('alreadyexists', 'local_relationship');
             } else if ($group['exists_external']) {
-                $text = html_writer::tag('span', $group['name'], array('style' => 'color:red; font-weight: bold;')) . get_string('alreadyexistsexternal', 'local_relationship');
+                $text = html_writer::tag('span', $group['name'], array('style' => 'color:red; font-weight: bold;')).get_string('alreadyexistsexternal', 'local_relationship');
             } else {
                 $text = $group['name'];
             }
