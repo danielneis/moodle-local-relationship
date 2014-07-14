@@ -1,9 +1,9 @@
 <?php
 
 require_once(__DIR__.'/../../config.php');
+require_once($CFG->libdir.'/filelib.php');
 require_once($CFG->dirroot.'/local/relationship/lib.php');
 require_once($CFG->dirroot.'/local/relationship/locallib.php');
-require_once($CFG->dirroot.'/local/relationship/edit_form.php');
 
 require_login();
 
@@ -49,8 +49,8 @@ relationship_set_header($context, $baseurl, $relationship);
 
 $editoroptions = array('maxfiles' => 0, 'context' => $context);
 
-$relationship = file_prepare_standard_editor($relationship, 'description', $editoroptions, $context);
-$editform = new relationship_edit_form(null, array('editoroptions' => $editoroptions, 'data' => $relationship));
+$relationship_editor = file_prepare_standard_editor($relationship, 'description', $editoroptions, $context);
+$editform = new \local_relationship\form\edit_relationship(null, array('editoroptions' => $editoroptions, 'data' => $relationship_editor));
 
 if ($editform->is_cancelled()) {
     redirect($returnurl);
@@ -64,7 +64,7 @@ if ($editform->is_cancelled()) {
     redirect($returnurl);
 }
 
-$action = $relationship->id ? 'editrelationship' : 'addrelationship';
-relationship_set_title($relationship, $action);
+$action = $relationship_editor->id ? 'editrelationship' : 'addrelationship';
+relationship_set_title($relationship_editor, $action);
 echo $editform->display();
 echo $OUTPUT->footer();

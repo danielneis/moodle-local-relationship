@@ -3,7 +3,6 @@
 require_once(__DIR__.'/../../config.php');
 require_once($CFG->dirroot.'/local/relationship/lib.php');
 require_once($CFG->dirroot.'/local/relationship/locallib.php');
-require_once($CFG->dirroot.'/local/relationship/edit_cohort_form.php');
 
 require_login();
 
@@ -49,7 +48,7 @@ if (optional_param('delete', 0, PARAM_BOOL) && $relationshipcohort->id) {
     exit;
 }
 
-$editform = new relationshipcohort_edit_form(null, array('data' => $relationshipcohort));
+$editform = new \local_relationship\form\edit_cohort(null, array('data' => $relationshipcohort));
 
 if ($editform->is_cancelled()) {
     redirect($returnurl);

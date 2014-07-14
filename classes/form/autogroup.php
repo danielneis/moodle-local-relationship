@@ -1,4 +1,5 @@
 <?php
+namespace local_relationship\form;
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot.'/lib/formslib.php');
@@ -9,7 +10,7 @@ require_once($CFG->dirroot.'/lib/formslib.php');
  * @package enrol_relationship
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class autogroup_form extends moodleform {
+class autogroup extends \moodleform {
 
     /**
      * Form Definition

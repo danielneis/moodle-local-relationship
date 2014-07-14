@@ -3,7 +3,6 @@
 require_once(__DIR__.'/../../config.php');
 require_once($CFG->dirroot.'/local/relationship/lib.php');
 require_once($CFG->dirroot.'/local/relationship/locallib.php');
-require_once($CFG->dirroot.'/local/relationship/autogroup_form.php');
 require_once($CFG->dirroot.'/group/lib.php');
 
 require_login();
@@ -27,7 +26,7 @@ $preview = '';
 $error = '';
 
 /// Create the form
-$editform = new autogroup_form(null, array('relationshipid' => $relationshipid));
+$editform = new \local_relationship\form\autogroup(null, array('relationshipid' => $relationshipid));
 $editform->set_data(array('relationshipid' => $relationshipid));
 
 /// Handle form submission

@@ -1,10 +1,10 @@
 <?php
-
+namespace local_relationship\form;
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot.'/lib/formslib.php');
 
-class relationship_edit_form extends moodleform {
+class edit_relationship extends \moodleform {
 
     public function definition() {
 
