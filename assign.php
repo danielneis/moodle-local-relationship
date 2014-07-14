@@ -30,9 +30,9 @@ echo $OUTPUT->notification(get_string('removeuserwarning', 'local_relationship')
 
 // Get the user_selector we will need.
 if ($editable) {
-    $potentialuserselector = new relationship_candidate_selector('addselect', array('relationshipgroup' => $relationshipgroup));
+    $potentialuserselector = new local_relationship_candidate_selector('addselect', array('relationshipgroup' => $relationshipgroup));
 }
-$existinguserselector = new relationship_existing_selector('removeselect', array('relationshipgroup' => $relationshipgroup));
+$existinguserselector = new local_relationship_existing_selector('removeselect', array('relationshipgroup' => $relationshipgroup));
 
 // Process incoming user assignments to the relationship
 
