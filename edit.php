@@ -1,8 +1,9 @@
 <?php
 
-require('../../config.php');
-require($CFG->dirroot.'/local/relationship/locallib.php');
-require($CFG->dirroot.'/local/relationship/edit_form.php');
+require_once(__DIR__.'/../../config.php');
+require_once($CFG->libdir.'/filelib.php');
+require_once($CFG->dirroot.'/local/relationship/lib.php');
+require_once($CFG->dirroot.'/local/relationship/locallib.php');
 
 require_login();
 
@@ -14,11 +15,11 @@ if ($relationshipid) {
     $contextid = optional_param('contextid', 0, PARAM_INT);
     $context = context::instance_by_id($contextid, MUST_EXIST);
     $relationship = new stdClass();
-    $relationship->id          = 0;
-    $relationship->contextid   = $context->id;
-    $relationship->name        = '';
+    $relationship->id = 0;
+    $relationship->contextid = $context->id;
+    $relationship->name = '';
     $relationship->description = '';
-    $relationship->tags        = array();
+    $relationship->tags = array();
 }
 
 require_capability('local/relationship:manage', $context);
@@ -26,8 +27,8 @@ if (!empty($relationship->component)) {
     print_error('cantedit', 'local_relationship');
 }
 
-$baseurl = new moodle_url('/local/relationship/edit.php', array('relationshipid'=>$relationship->id, 'contextid'=>$context->id));
-$returnurl = new moodle_url('/local/relationship/index.php', array('contextid'=>$context->id));
+$baseurl = new moodle_url('/local/relationship/edit.php', array('relationshipid' => $relationship->id, 'contextid' => $context->id));
+$returnurl = new moodle_url('/local/relationship/index.php', array('contextid' => $context->id));
 
 if (optional_param('confirmdelete', 0, PARAM_BOOL) && confirm_sesskey() && $relationship->id) {
     relationship_delete_relationship($relationship);
@@ -37,7 +38,7 @@ if (optional_param('confirmdelete', 0, PARAM_BOOL) && confirm_sesskey() && $rela
 if (optional_param('delete', 0, PARAM_BOOL) && $relationship->id) {
     relationship_set_header($context, $baseurl, $relationship);
     relationship_set_title($relationship, 'deleterelationship');
-    $yesurl = new moodle_url('/local/relationship/edit.php', array('relationshipid'=>$relationship->id, 'confirmdelete'=>1, 'sesskey'=>sesskey()));
+    $yesurl = new moodle_url('/local/relationship/edit.php', array('relationshipid' => $relationship->id, 'confirmdelete' => 1, 'sesskey' => sesskey()));
     $message = get_string('confirmdelete', 'local_relationship', format_string($relationship->name));
     echo $OUTPUT->confirm($message, $yesurl, $returnurl);
     echo $OUTPUT->footer();
@@ -46,10 +47,10 @@ if (optional_param('delete', 0, PARAM_BOOL) && $relationship->id) {
 
 relationship_set_header($context, $baseurl, $relationship);
 
-$editoroptions = array('maxfiles'=>0, 'context'=>$context);
+$editoroptions = array('maxfiles' => 0, 'context' => $context);
 
-$relationship = file_prepare_standard_editor($relationship, 'description', $editoroptions, $context);
-$editform = new relationship_edit_form(null, array('editoroptions'=>$editoroptions, 'data'=>$relationship));
+$relationship_editor = file_prepare_standard_editor($relationship, 'description', $editoroptions, $context);
+$editform = new \local_relationship\form\edit_relationship(null, array('editoroptions' => $editoroptions, 'data' => $relationship_editor));
 
 if ($editform->is_cancelled()) {
     redirect($returnurl);
@@ -63,7 +64,7 @@ if ($editform->is_cancelled()) {
     redirect($returnurl);
 }
 
-$action = $relationship->id ? 'editrelationship' : 'addrelationship';
-relationship_set_title($relationship, $action);
+$action = $relationship_editor->id ? 'editrelationship' : 'addrelationship';
+relationship_set_title($relationship_editor, $action);
 echo $editform->display();
 echo $OUTPUT->footer();

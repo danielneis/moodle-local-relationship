@@ -19,8 +19,6 @@
  *
  * @package enrol_relationship
  * @category event
- * @copyright 2010 Petr Skoda {@link http://skodak.org}
- * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
@@ -28,17 +26,14 @@ defined('MOODLE_INTERNAL') || die();
 $observers = array(
     array(
         'eventname' => '\core\event\cohort_member_added',
-        'callback' => 'local_relationship_handler::member_added',
-        'includefile' => '/local/relationship/locallib.php'
+        'callback' => 'local_relationship_observer::member_added',
     ),
     array(
         'eventname' => '\core\event\cohort_member_removed',
-        'callback' => 'local_relationship_handler::member_removed',
-        'includefile' => '/local/relationship/locallib.php'
+        'callback' => 'local_relationship_observer::member_removed',
     ),
     array(
         'eventname' => ' \core\event\cohort_deleted',
-        'callback' => 'local_relationship_handler:cohort_removed',
-        'includefile' => '/local/relationship/locallib.php'
+        'callback' => 'local_relationship_observer:cohort_removed',
     ),
 );

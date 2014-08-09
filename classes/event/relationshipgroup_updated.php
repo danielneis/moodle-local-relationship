@@ -17,9 +17,8 @@
 /**
  * relationship updated event.
  *
- * @package    local
- * @copyright  2013 Dan Poltawski <dan@moodle.com>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package local_relationship
+ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 namespace local_relationship\event;
@@ -28,9 +27,8 @@ defined('MOODLE_INTERNAL') || die();
 /**
  * relationship updated event class.
  *
- * @package    local
- * @copyright  2013 Dan Poltawski <dan@moodle.com>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package local_relationship
+ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class relationshipgroup_updated extends \core\event\base {
 
