@@ -2,6 +2,8 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+require($CFG->dirroot.'/local/relationship/lib.php');
+
 /**
  * Event handler for relationship local plugin.
  *
