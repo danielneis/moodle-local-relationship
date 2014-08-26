@@ -15,10 +15,11 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * relationship enrolment plugin event handler definition.
+ * Relationship Enrolment Plugin event handler definition.
  *
- * @package enrol_relationship
+ * @package local_relationship
  * @category event
+ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
