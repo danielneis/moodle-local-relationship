@@ -36,53 +36,41 @@ class local_relationship_candidate_selector extends user_selector_base {
     public function find_users($search) {
         global $DB;
 
-        // By default wherecondition retrieves all users except the deleted, not confirmed and guest.
-        list($usercondition, $params) = $this->search_sql($search, 'u');
+        list($usercondition, $params) = users_search_sql($search, 'u', $this->searchanywhere);
+
+        if(!empty($this->validatinguserids)) {
+            list($usertest, $userparams) = $DB->get_in_or_equal($this->validatinguserids, SQL_PARAMS_NAMED, 'val');
+            $usercondition .= " AND u.id*1000000+rc.id " . $usertest;
+            $params = array_merge($params, $userparams);
+        }
+
         $params['relationshipid'] = $this->relationshipgroup->relationshipid;
         $params['relationshipgroupid'] = $this->relationshipgroup->id;
 
-        $fields      = 'SELECT ' . $this->required_fields_sql('u') . ', :relationshipcohortid as relationshipcohortid';
-        $countfields = 'SELECT COUNT(1)';
+        $countfields  = 'SELECT COUNT(DISTINCT u.id)';
+        $selectfields = "SELECT DISTINCT u.id*1000000+rc.id as id, rc.id AS relationshipcohortid, rc.roleid, rc.allowdupsingroups,
+                                u.id AS userid, CONCAT(u.firstname, ' ', u.lastname) AS fullname,
+                                CASE WHEN rm.id IS NULL THEN 0 ELSE 1 END AS in_group";
 
-        $from = " FROM {cohort} ch
-                  JOIN {cohort_members} chm ON (chm.cohortid = ch.id)
-                  JOIN {user} u ON (u.id = chm.userid)";
+        $from = "FROM relationship_cohorts rc
+                 JOIN cohort_members cm ON (cm.cohortid = rc.cohortid)
+                 JOIN user u ON (u.id = cm.userid)
+            LEFT JOIN relationship_members rm ON (rm.relationshipcohortid = rc.id AND rm.userid = cm.userid)
+                WHERE rc.relationshipid = :relationshipid
+                  AND NOT EXISTS (SELECT 1
+                                    FROM relationship_members rm
+                                   WHERE rm.relationshipcohortid = rc.id
+                                     AND rm.userid = cm.userid
+                                     AND rm.relationshipgroupid = :relationshipgroupid)
+                  AND (rc.allowdupsingroups = 1
+                       OR (rc.allowdupsingroups = 0 AND rm.id IS NULL))
+                  AND {$usercondition}";
 
-        $where = " WHERE ch.id = :cohortid
-                     AND {$usercondition}
-                     AND jrm.userid IS NULL";
-
-        list($sort, $sortparams) = users_order_by_sql('u', $search, $this->accesscontext);
-        $order = " ORDER BY {$sort}";
-
-        $join_not_alloc_grp = " JOIN (SELECT DISTINCT rm.userid
-                                        FROM {relationship_groups} rg
-                                        JOIN {relationship_members} rm ON (rm.relationshipgroupid = rg.id)
-                                       WHERE rg.relationshipid = :relationshipid) jrm1
-                                  ON (jrm1.userid = u.id)
-                           LEFT JOIN (SELECT DISTINCT rm.userid
-                                        FROM {relationship_groups} rg
-                                        JOIN {relationship_members} rm ON (rm.relationshipgroupid = rg.id)
-                                       WHERE rg.id = :relationshipgroupid) jrm
-                                  ON (jrm.userid = u.id)";
-        $join_not_alloc_all = " LEFT JOIN (SELECT DISTINCT rm.userid
-                                             FROM {relationship_groups} rg
-                                             JOIN {relationship_members} rm ON (rm.relationshipgroupid = rg.id)
-                                            WHERE rg.relationshipid = :relationshipid) jrm
-                                       ON (jrm.userid = u.id)";
-
-        $role_cohorts = $DB->get_records('relationship_cohorts', array('relationshipid'=>$this->relationshipgroup->relationshipid));
+        $orderby= "ORDER BY roleid, in_group, fullname";
 
         if (!$this->is_validating()) {
-            $count = 0;
-            foreach($role_cohorts AS $rc) {
-                $params['cohortid'] = $rc->cohortid;
-                if($rc->allowdupsingroups) {
-                    $count += $DB->count_records_sql($countfields . $from . $join_not_alloc_grp . $where, $params);
-                }
-                $count += $DB->count_records_sql($countfields . $from . $join_not_alloc_all . $where, $params);
-            }
-
+            $sql = $countfields . "\n" . $from;
+            $count = $DB->count_records_sql($sql, $params);
             if ($count > $this->maxusersperpage) {
                 return $this->too_many_results($search, $count);
             } else if ($count == 0) {
@@ -90,35 +78,44 @@ class local_relationship_candidate_selector extends user_selector_base {
             }
         }
 
+        $sql = $selectfields . "\n" . $from .  "\n" . $orderby;
+
         $users = array();
-        foreach($role_cohorts AS $rc) {
-            $params['relationshipcohortid'] = $rc->id;
-            $params['cohortid'] = $rc->cohortid;
-            $role = $DB->get_record('role', array('id'=>$rc->roleid), '*', MUST_EXIST);
-            $role_name = role_get_name($role);
-            if($rc->allowdupsingroups) {
-                $someusers = $DB->get_records_sql($fields . $from . $join_not_alloc_all . $where . $order, array_merge($params, $sortparams));
-                if(count($someusers) > 0) {
-                    $users[$role_name . get_string('notallocated', 'local_relationship')] = $someusers;
-                }
-                $someusers = $DB->get_records_sql($fields . $from . $join_not_alloc_grp . $where . $order, array_merge($params, $sortparams));
-                if(count($someusers) > 0) {
-                    $users[$role_name . get_string('allocated', 'local_relationship')] = $someusers;
-                }
-            } else {
-                $someusers = $DB->get_records_sql($fields . $from . $join_not_alloc_all . $where . $order, array_merge($params, $sortparams));
-                if(count($someusers) > 0) {
-                    $users[$role_name] = $someusers;
-                }
+        $roleid = -1;
+        $in_group = -1;
+        $index = false;
+        foreach($DB->get_recordset_sql($sql, $params) AS $cand) {
+            if($cand->roleid != $roleid || $cand->in_group != $in_group) {
+                $role = $DB->get_record('role', array('id'=>$cand->roleid), '*', MUST_EXIST);
+                $role_name = role_get_name($role);
+
+                $str_alloc = $cand->in_group == 1  ? get_string('allocated', 'local_relationship') : get_string('notallocated', 'local_relationship');
+                $index = $role_name . $str_alloc;
+                $users[$index] = array();
+
+                $roleid = $cand->roleid;
+                $in_group = $cand->in_group;
             }
+
+            $users[$index][$cand->id] = $cand;
         }
+
         return $users;
+    }
+
+    /**
+     * Convert a user object to a string suitable for displaying as an option in the list box.
+     *
+     * @param object $user the user to display.
+     * @return string a string representation of the user.
+     */
+    public function output_user($user) {
+        return $user->fullname;
     }
 
     protected function get_options() {
         $options = parent::get_options();
         $options['relationshipgroup'] = $this->relationshipgroup;
-        $options['file'] = 'local/relationship/locallib.php';
         return $options;
     }
 

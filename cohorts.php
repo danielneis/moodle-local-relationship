@@ -47,6 +47,7 @@ foreach ($relationshipcohorts as $rch) {
     $line = array();
 
     $line[] = $rch->cohort ? $rch->cohort->name : '?';
+    $line[] = $rch->cohort ? $DB->count_records('cohort_members', array('cohortid'=>$rch->cohort->id)) : '?';
     $line[] = $rch->role_name;
     $line[] = $rch->allowdupsingroups ? get_string('yes') : get_string('no');
     $line[] = $rch->uniformdistribution ? get_string('yes') : get_string('no');
@@ -65,6 +66,7 @@ foreach ($relationshipcohorts as $rch) {
 $table = new html_table();
 $table->head = array(
         get_string('cohort', 'cohort'),
+        get_string('size'),
         get_string('role'),
         get_string('allowdupsingroups', 'local_relationship').$OUTPUT->help_icon('allowdupsingroups', 'local_relationship'),
         get_string('uniformdistribute', 'local_relationship').$OUTPUT->help_icon('uniformdistribute', 'local_relationship'),

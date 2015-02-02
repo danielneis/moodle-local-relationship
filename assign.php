@@ -61,7 +61,7 @@ if ($canassign && optional_param('add', false, PARAM_BOOL) && confirm_sesskey())
     $userstoassign = $potentialuserselector->get_selected_users();
     if (!empty($userstoassign)) {
         foreach ($userstoassign as $adduser) {
-            relationship_add_member($relationshipgroup->id, $adduser->relationshipcohortid, $adduser->id);
+            relationship_add_member($relationshipgroup->id, $adduser->relationshipcohortid, $adduser->userid);
         }
         $potentialuserselector->invalidate_selected_users();
         $existinguserselector->invalidate_selected_users();
@@ -73,7 +73,7 @@ if ($canassign && optional_param('remove', false, PARAM_BOOL) && confirm_sesskey
     $userstoremove = $existinguserselector->get_selected_users();
     if (!empty($userstoremove)) {
         foreach ($userstoremove as $removeuser) {
-            relationship_remove_member($relationshipgroup->id, $removeuser->relationshipcohortid, $removeuser->id);
+            relationship_remove_member($relationshipgroup->id, $removeuser->relationshipcohortid, $removeuser->userid);
         }
         $potentialuserselector->invalidate_selected_users();
         $existinguserselector->invalidate_selected_users();

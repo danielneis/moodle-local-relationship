@@ -39,17 +39,15 @@ class local_relationship_observer
      * @param \core\event\cohort_deleted $event
      * @return bool
      */
-    public static function cohort_removed(\core\event\cohort_deleted $event)
-    {
+    public static function cohort_removed(\core\event\cohort_deleted $event) {
         global $DB;
 
-        /*
-        if($rels = $DB->get_records('relationship', array('uniformdistribution'=>1, 'cohortid2'=>$event->objectid))) {
-        foreach($rels AS $rel) {
-        relationship_uniformly_distribute_users($rel, array($event->relateduserid));
+        $relationshipcohorts = $DB->get_records('relationship_cohorts', array('cohortid'=>$event->objectid));
+        if (!empty($relationshipcohorts)) {
+            foreach ($relationshipcohorts as $relationshipcohort) {
+                relationship_delete_cohort($relationshipcohort);
+            }
         }
-        }
-        */
 
         return true;
     }
