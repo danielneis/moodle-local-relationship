@@ -55,9 +55,9 @@ class local_relationship_existing_selector extends user_selector_base {
         $countfields  = 'SELECT COUNT(1)';
         $selectfields = "SELECT u.id*1000000+rc.id as id, rc.id AS relationshipcohortid, rc.roleid, u.id AS userid, CONCAT(u.firstname, ' ', u.lastname) AS fullname";
 
-        $from = "FROM relationship_members rm
-                 JOIN relationship_cohorts rc ON (rc.id = rm.relationshipcohortid) 
-                 JOIN user u ON (u.id = rm.userid)
+        $from = "FROM {relationship_members} rm
+                 JOIN {relationship_cohorts} rc ON (rc.id = rm.relationshipcohortid) 
+                 JOIN {user} u ON (u.id = rm.userid)
                 WHERE rm.relationshipgroupid = :relationshipgroupid
                   AND {$usercondition}";
 

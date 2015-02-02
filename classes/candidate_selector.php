@@ -52,13 +52,13 @@ class local_relationship_candidate_selector extends user_selector_base {
                                 u.id AS userid, CONCAT(u.firstname, ' ', u.lastname) AS fullname,
                                 CASE WHEN rm.id IS NULL THEN 0 ELSE 1 END AS in_group";
 
-        $from = "FROM relationship_cohorts rc
-                 JOIN cohort_members cm ON (cm.cohortid = rc.cohortid)
-                 JOIN user u ON (u.id = cm.userid)
-            LEFT JOIN relationship_members rm ON (rm.relationshipcohortid = rc.id AND rm.userid = cm.userid)
+        $from = "FROM {relationship_cohorts} rc
+                 JOIN {cohort_members} cm ON (cm.cohortid = rc.cohortid)
+                 JOIN {user} u ON (u.id = cm.userid)
+            LEFT JOIN {relationship_members} rm ON (rm.relationshipcohortid = rc.id AND rm.userid = cm.userid)
                 WHERE rc.relationshipid = :relationshipid
                   AND NOT EXISTS (SELECT 1
-                                    FROM relationship_members rm
+                                    FROM {relationship_members} rm
                                    WHERE rm.relationshipcohortid = rc.id
                                      AND rm.userid = cm.userid
                                      AND rm.relationshipgroupid = :relationshipgroupid)
