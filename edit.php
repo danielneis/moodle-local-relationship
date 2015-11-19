@@ -52,7 +52,10 @@ $baseurl = new moodle_url('/local/relationship/edit.php', array('relationshipid'
 $returnurl = new moodle_url('/local/relationship/index.php', array('contextid' => $context->id));
 
 if (optional_param('confirmdelete', 0, PARAM_BOOL) && confirm_sesskey() && $relationship->id) {
-    relationship_delete_relationship($relationship);
+    $res = relationship_delete_relationship($relationship);
+    if($res == -1) {
+        print_error('has_cohorts', 'local_relationship');
+    }
     redirect($returnurl);
 }
 

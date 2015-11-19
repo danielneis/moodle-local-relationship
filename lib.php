@@ -328,14 +328,21 @@ function relationship_delete_relationship($relationship) {
     try {
         $transaction = $DB->start_delegated_transaction();
 
-        $DB->delete_records('relationship_cohorts', array('relationshipid' => $relationship->id));
 
-        $tags = tag_get_tags_array('relationship', $relationship->id);
-        tag_delete(array_keys($tags));
+        $cohorts = $DB->get_records('relationship_cohorts', array('relationshipid' => $relationship->id));
 
-        $DB->delete_records('relationship', array('id' => $relationship->id));
+        if(count($cohorts) == 0) {
+            $DB->delete_records('relationship_cohorts', array('relationshipid' => $relationship->id));
 
-        $transaction->allow_commit();
+            $tags = tag_get_tags_array('relationship', $relationship->id);
+            tag_delete(array_keys($tags));
+
+            $DB->delete_records('relationship', array('id' => $relationship->id));
+
+            $transaction->allow_commit();
+        } else {
+            return -1;
+        }
     } catch (Exception $e) {
         $transaction->rollback($e);
 
