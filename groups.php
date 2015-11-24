@@ -44,6 +44,7 @@ relationship_set_header($context, $baseurl, $relationship, 'groups');
 relationship_set_title($relationship, 'groups');
 
 $relationshipgroups = relationship_get_groups($relationshipid);
+
 $data = array();
 foreach ($relationshipgroups as $relationshipgroup) {
     $line = array();

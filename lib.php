@@ -95,7 +95,6 @@ function relationship_uniformly_distribute_users($relationshipcohort, $userids) 
     if (empty($userids)) {
         return;
     }
-
     $sql = "SELECT rg.id, rg.userlimit, count(DISTINCT rm.userid) as count
               FROM {relationship_cohorts} rc
               JOIN {relationship_groups} rg
@@ -105,7 +104,6 @@ function relationship_uniformly_distribute_users($relationshipcohort, $userids) 
              WHERE rc.id = :relationshipcohortid
           GROUP BY rg.id";
     $groups = $DB->get_records_sql($sql, array('relationshipcohortid' => $relationshipcohort->id));
-
     if (!empty($groups)) {
         foreach ($userids AS $userid) {
             $min = 99999999;
@@ -449,7 +447,6 @@ function relationship_update_cohort($relationshipcohort) {
  */
 function relationship_delete_cohort($relationshipcohort) {
     global $DB;
-
     $members = $DB->get_records('relationship_members', array('relationshipcohortid' => $relationshipcohort->id));
     foreach ($members as $m) {
         relationship_remove_member($m->relationshipgroupid, $m->relationshipcohortid, $m->userid);
