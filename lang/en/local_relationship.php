@@ -152,3 +152,4 @@ $string['tag_already_exists'] = 'Esta etiqueta já existe. Entre com outro nome 
 $string['group_already_exists'] = 'Este grupo já existe. Entre com outro nome para o grupo!';
 $string['course_group_already_exists'] = 'já há grupo com mesmo nome no curso: \'{$a}\'. É necessário renomear ou remover esse grupo.';
 $string['relationship_already_exists'] = 'Já existe relacionamento com este nome neste contexto. Ofereça outro nome para o relacionamento.';
+$string['has_cohorts'] = 'O relacionamento não pode ser excluído pois há um ou mais coortes cadastrados';
