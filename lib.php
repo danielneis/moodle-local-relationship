@@ -24,7 +24,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-function local_relationship_extends_settings_navigation(navigation_node $navigation) {
+function local_relationship_extend_settings_navigation(navigation_node $navigation) {
     global $PAGE;
 
     if (is_a($PAGE->context, 'context_coursecat') && has_capability('local/relationship:manage', $PAGE->context)) {
