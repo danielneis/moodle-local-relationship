@@ -31,3 +31,15 @@ Eventos
 -------
 
 Este plugin utiliza a nova API de eventos, descrita em: http://docs.moodle.org/dev/Event_2
+
+Permissões
+----------
+
+Para que os relacionamentos possam ficar operacionais as seguintes 
+permissões devem ser definidas para os papéis:
+
+|   Capability              | Papel | Descrição |
+| --- | --- | --- |
+| **local/relationship:manage** | Gerente, Cordenador AVEA  | Gerenciar relacionamentos | 
+| **local/relationship:view** | Gerente, Cordenador AVEA | Usar relacionamentos e ver membros |
+| **local/relationship:assign** | Gerente, Cordenador AVEA | Designar membros do relacionamento' |
