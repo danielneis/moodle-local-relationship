@@ -1,4 +1,4 @@
-@relationship
+@local @local_relationship
 Feature: Manipulation of relationships
   In order to control usage of relationships
   As a user
